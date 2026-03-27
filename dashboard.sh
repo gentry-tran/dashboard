@@ -819,10 +819,22 @@ disk_display=$(df -h "${current_dir:-.}" 2>/dev/null | awk 'NR==2 {printf "%s/%s
 disk_usage="${disk_usage:-0}"
 disk_display="${disk_display:-?}"
 
-# Agent/task counts (from Claude Code task system if available)
-# Count background agent processes
-agent_count=$(ps aux 2>/dev/null | grep -c "[c]laude.*--agent" || echo "0")
-agent_count="${agent_count:-0}"
+# Active subagents (from heartbeat files in MEMORY/WORK)
+WORK_DIR="${CONFIG_DIR}/MEMORY/WORK"
+agent_names=""
+agent_count=0
+if [ -d "$WORK_DIR" ]; then
+  now_epoch=$(date +%s)
+  agent_names=$(find "$WORK_DIR" -name 'heartbeat.txt' 2>/dev/null | while read hb; do
+    dir=$(dirname "$hb")
+    [ -f "$dir/COMPLETE" ] && continue
+    hb_time=$(cat "$hb" 2>/dev/null | tr -d '[:space:]')
+    [ -z "$hb_time" ] && continue
+    [ "$((now_epoch - hb_time))" -lt 900 ] && basename "$dir"
+  done | sort | tr '\n' ' ')
+  agent_count=$(echo "$agent_names" | wc -w | tr -d ' ')
+  [ -z "$agent_names" ] && agent_count=0
+fi
 
 # Session turn count (estimate from conversation history size)
 turn_count=$(echo "$input" | jq -r '.conversation.turn_count // empty' 2>/dev/null)
@@ -981,7 +993,7 @@ printf "${T_ACCENT3}Session:${RESET} ${T_VALUE}${time_dur}${RESET}"
 [ "$turn_count" != "?" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Turns:${RESET} ${T_VALUE}${turn_count}${RESET}"
 [ -n "$cost_display" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Cost:${RESET} ${T_VALUE}${cost_display}${RESET}"
 if [ "$agent_count" -gt 0 ] 2>/dev/null; then
-  printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Agents:${RESET} ${T_GREEN}${agent_count} active${RESET}"
+  printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Agents:${RESET} ${T_GREEN}${agent_count}${RESET} ${T_VALUE}${agent_names}${RESET}"
 fi
 printf "\n"
 

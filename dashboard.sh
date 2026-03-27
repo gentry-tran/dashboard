@@ -41,7 +41,7 @@ WEATHER_CACHE_TTL=${DASHBOARD_WEATHER_TTL:-900}    # 15 minutes
 CONTEXT_BASELINE=${DASHBOARD_CONTEXT_BASELINE:-22600}
 
 # Theme (env var > CLI arg > config file > default)
-THEME="${DASHBOARD_THEME:-cyberpunk}"
+THEME="${DASHBOARD_THEME:-harvest}"
 
 # Parse CLI args
 for arg in "$@"; do
@@ -645,8 +645,8 @@ load_theme() {
 
     *)
       echo "Unknown theme: $theme. Available: terminal-green, solarized, nord, cyberpunk, minimal, batman, iron-man, dbz, evangelion, ghost-in-shell, akira, spider-verse, blade-runner, one-piece, ghibli, rainforest, garden, terrarium, harvest" >&2
-      THEME="cyberpunk"
-      load_theme "cyberpunk"
+      THEME="harvest"
+      load_theme "harvest"
       return
       ;;
   esac

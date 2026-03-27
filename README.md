@@ -56,22 +56,36 @@ chmod +x dashboard.sh
 
 ```bash
 # Option 1: Environment variable
-export DASHBOARD_THEME=cyberpunk
+export DASHBOARD_THEME=harvest
 
 # Option 2: In settings.json
 {
   "statusLine": {
     "type": "command",
-    "command": "DASHBOARD_THEME=cyberpunk /path/to/dashboard/dashboard.sh"
+    "command": "DASHBOARD_THEME=harvest /path/to/dashboard/dashboard.sh"
   }
 }
 ```
 
 ## Themes
 
+### Nature Themes
+
+#### Harvest (default)
+![Harvest](screenshots/harvest.png)
+
+#### Rainforest
+![Rainforest](screenshots/rainforest.png)
+
+#### Garden
+![Garden](screenshots/garden.png)
+
+#### Terrarium
+![Terrarium](screenshots/terrarium.png)
+
 ### Standard Themes
 
-#### Cyberpunk (default)
+#### Cyberpunk
 ![Cyberpunk](screenshots/cyberpunk.png)
 
 #### Terminal Green
@@ -108,7 +122,7 @@ export DASHBOARD_THEME=cyberpunk
 #### Akira
 ![Akira](screenshots/akira.png)
 
-### More Pop Culture Themes
+### Pop Culture Themes
 
 #### Spider-Verse
 ![Spider-Verse](screenshots/spider-verse.png)
@@ -121,20 +135,6 @@ export DASHBOARD_THEME=cyberpunk
 
 #### Ghibli
 ![Ghibli](screenshots/ghibli.png)
-
-### Nature Themes
-
-#### Rainforest
-![Rainforest](screenshots/rainforest.png)
-
-#### Garden
-![Garden](screenshots/garden.png)
-
-#### Terrarium
-![Terrarium](screenshots/terrarium.png)
-
-#### Harvest
-![Harvest](screenshots/harvest.png)
 
 ## Theme List
 
@@ -166,7 +166,7 @@ export DASHBOARD_THEME=cyberpunk
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `DASHBOARD_THEME` | `midnight` | Active theme name |
+| `DASHBOARD_THEME` | `harvest` | Active theme name |
 | `DASHBOARD_USAGE_TTL` | `120` | Usage API cache TTL in seconds |
 | `DASHBOARD_LOCATION_TTL` | `3600` | Location cache TTL in seconds |
 | `DASHBOARD_WEATHER_TTL` | `900` | Weather cache TTL in seconds |

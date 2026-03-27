@@ -207,20 +207,20 @@ load_theme() {
 
     cyberpunk)
       T_HEADER="DASHBOARD"
-      T_BORDER='\033[38;2;40;0;60m'
+      T_BORDER='\033[38;2;60;0;80m'
       T_TITLE='\033[1;38;2;255;45;149m'
-      T_LABEL='\033[38;2;130;0;180m'
-      T_VALUE='\033[1;38;2;240;230;200m'
+      T_LABEL='\033[38;2;180;140;220m'
+      T_VALUE='\033[1;37m'
       T_HIGHLIGHT='\033[1;38;2;0;240;255m'
       T_ACCENT1='\033[1;38;2;255;45;149m'  # hot pink
-      T_ACCENT2='\033[1;38;2;240;230;200m'  # bold warm white (was neon yellow)
-      T_ACCENT3='\033[38;2;0;240;255m'     # electric cyan
-      T_ACCENT4='\033[38;2;130;0;180m'     # purple
+      T_ACCENT2='\033[1;38;2;255;45;149m'  # hot pink for usage
+      T_ACCENT3='\033[1;38;2;0;240;255m'   # electric cyan
+      T_ACCENT4='\033[38;2;180;140;220m'   # light purple
       T_GREEN='\033[1;38;2;0;240;255m'
-      T_YELLOW='\033[38;2;255;180;80m'   # warm orange (was neon yellow, unreadable)
+      T_YELLOW='\033[1;38;2;255;180;80m'   # warm orange
       T_RED='\033[1;38;2;255;45;149m'
-      T_DIM='\033[38;2;30;0;45m'
-      T_WEATHER='\033[38;2;0;240;255m'
+      T_DIM='\033[38;2;40;0;55m'
+      T_WEATHER='\033[1;38;2;0;220;235m'
       T_SEP="║"
       T_LINE_H="═"
       T_LINE_TOP="═"

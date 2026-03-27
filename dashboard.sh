@@ -209,15 +209,15 @@ load_theme() {
       T_HEADER="DASHBOARD"
       T_BORDER='\033[38;2;40;0;60m'
       T_TITLE='\033[1;38;2;255;45;149m'
-      T_LABEL='\033[38;2;150;0;200m'
-      T_VALUE='\033[38;2;255;230;0m'
+      T_LABEL='\033[38;2;130;0;180m'
+      T_VALUE='\033[38;2;220;200;140m'
       T_HIGHLIGHT='\033[1;38;2;0;240;255m'
       T_ACCENT1='\033[1;38;2;255;45;149m'  # hot pink
-      T_ACCENT2='\033[38;2;255;230;0m'     # neon yellow
+      T_ACCENT2='\033[38;2;220;200;140m'   # soft gold (was neon yellow)
       T_ACCENT3='\033[38;2;0;240;255m'     # electric cyan
-      T_ACCENT4='\033[38;2;150;0;200m'     # purple
+      T_ACCENT4='\033[38;2;130;0;180m'     # purple
       T_GREEN='\033[1;38;2;0;240;255m'
-      T_YELLOW='\033[38;2;255;230;0m'
+      T_YELLOW='\033[38;2;255;180;80m'   # warm orange (was neon yellow, unreadable)
       T_RED='\033[1;38;2;255;45;149m'
       T_DIM='\033[38;2;30;0;45m'
       T_WEATHER='\033[38;2;0;240;255m'
@@ -673,6 +673,50 @@ skills_count=$(find "$CONFIG_DIR/skills" -mindepth 1 -maxdepth 1 -type d 2>/dev/
 mcp_count=$(jq -r '.mcpServers // {} | keys | length' "$CONFIG_DIR/settings.json" 2>/dev/null || echo "0")
 [ "$mcp_count" = "0" ] && mcp_count=$(find "$CONFIG_DIR" -name "*.mcp.json" -o -name "mcp*.json" 2>/dev/null | wc -l | tr -d ' ')
 
+# System stats
+cpu_load=$(sysctl -n vm.loadavg 2>/dev/null | awk '{print $2}' || uptime | awk -F'load averages?:' '{print $2}' | awk '{print $1}' | tr -d ',')
+cpu_load="${cpu_load:-?}"
+if command -v vm_stat >/dev/null 2>&1; then
+  # macOS
+  page_size=$(sysctl -n hw.pagesize 2>/dev/null || echo 4096)
+  free_pages=$(vm_stat 2>/dev/null | awk '/Pages free:/ {gsub(/\./,"",$3); print $3}')
+  inactive_pages=$(vm_stat 2>/dev/null | awk '/Pages inactive:/ {gsub(/\./,"",$3); print $3}')
+  free_mem_mb=$(( (${free_pages:-0} + ${inactive_pages:-0}) * page_size / 1048576 ))
+  total_mem_mb=$(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1048576 ))
+  mem_used_pct=0
+  [ "$total_mem_mb" -gt 0 ] && mem_used_pct=$(( (total_mem_mb - free_mem_mb) * 100 / total_mem_mb ))
+  mem_display="${free_mem_mb}MB free"
+else
+  # Linux
+  mem_display=$(free -m 2>/dev/null | awk '/^Mem:/ {printf "%dMB free", $7}')
+  mem_used_pct=$(free 2>/dev/null | awk '/^Mem:/ {printf "%.0f", ($2-$7)*100/$2}')
+fi
+mem_used_pct="${mem_used_pct:-0}"
+mem_display="${mem_display:-?}"
+
+# Disk usage of cwd
+disk_usage=$(df -h "${current_dir:-.}" 2>/dev/null | awk 'NR==2 {print $5}' | tr -d '%')
+disk_display=$(df -h "${current_dir:-.}" 2>/dev/null | awk 'NR==2 {printf "%s/%s (%s)", $3, $2, $5}')
+disk_usage="${disk_usage:-0}"
+disk_display="${disk_display:-?}"
+
+# Agent/task counts (from Claude Code task system if available)
+# Count background agent processes
+agent_count=$(ps aux 2>/dev/null | grep -c "[c]laude.*--agent" || echo "0")
+agent_count="${agent_count:-0}"
+
+# Session turn count (estimate from conversation history size)
+turn_count=$(echo "$input" | jq -r '.conversation.turn_count // empty' 2>/dev/null)
+turn_count="${turn_count:-?}"
+
+# Total cost
+total_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // empty' 2>/dev/null)
+if [ -n "$total_cost" ] && [ "$total_cost" != "null" ]; then
+  cost_display="\$$(printf '%.2f' "$total_cost" 2>/dev/null || echo "$total_cost")"
+else
+  cost_display=""
+fi
+
 # Context calculations
 content_tokens=$((cache_read + input_tokens + cache_creation + output_tokens))
 context_used=$((content_tokens + CONTEXT_BASELINE))
@@ -808,9 +852,25 @@ printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Week:${RESET} ${u7d_color}${usage
 [ -n "$reset_7d" ] && printf " ${T_LABEL}(${reset_7d})${RESET}"
 printf "\n"
 
-# Line 6: Session info
+# Line 6: Session — duration, turns, cost, agents
 [ -n "$T_ICON_SES" ] && printf "${T_ACCENT3}${T_ICON_SES}${RESET} "
 printf "${T_ACCENT3}Session:${RESET} ${T_VALUE}${time_dur}${RESET}"
+[ "$turn_count" != "?" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Turns:${RESET} ${T_VALUE}${turn_count}${RESET}"
+[ -n "$cost_display" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Cost:${RESET} ${T_VALUE}${cost_display}${RESET}"
+if [ "$agent_count" -gt 0 ] 2>/dev/null; then
+  printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Agents:${RESET} ${T_GREEN}${agent_count} active${RESET}"
+fi
+printf "\n"
+
+# Line 7: System — CPU, memory, disk
+sys_color_cpu=$(get_level_color "$(echo "$cpu_load" | awk '{printf "%.0f", $1 * 25}')" 2>/dev/null)
+sys_color_mem=$(get_level_color "$mem_used_pct")
+sys_color_disk=$(get_level_color "$disk_usage")
+
+printf "${T_LABEL}System:${RESET}  "
+printf "${T_LABEL}CPU:${RESET} ${sys_color_cpu:-$T_VALUE}${cpu_load}${RESET}"
+printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Mem:${RESET} ${sys_color_mem:-$T_VALUE}${mem_display}${RESET}"
+printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Disk:${RESET} ${sys_color_disk:-$T_VALUE}${disk_display}${RESET}"
 printf "\n"
 
 # Footer

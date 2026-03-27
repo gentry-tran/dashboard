@@ -808,9 +808,10 @@ else
 fi
 
 # Line 2: Location + Time + Weather
+# Colors: cyan labels, neon red city, cyan time value, neon red weather
 location_str=""
-[ -n "$city" ] && location_str="${T_LABEL}Location:${RESET} ${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_LABEL}${region}${RESET}"
-time_str="${T_LABEL}Time:${RESET} ${T_ACCENT4}${time_full}${RESET}"
+[ -n "$city" ] && location_str="${T_ACCENT3}Location:${RESET} ${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region}${RESET}"
+time_str="${T_ACCENT3}Time:${RESET} ${T_VALUE}${time_full}${RESET}"
 weather_str=""
 [ -n "$temp_c" ] && weather_str="${T_WEATHER}${temp_c}°C | ${temp_f}°F ${weather_desc}${RESET}"
 
@@ -825,7 +826,8 @@ else
 fi
 
 # Line 3: Claude Code version + Model + Skills + MCP
-printf "${T_LABEL}Claude Code v${cc_version}${RESET} ${T_BORDER}${T_SEP}${RESET} "
+# Colors: orange version, pink labels, green values
+printf "${T_ACCENT2}Claude Code v${cc_version}${RESET} ${T_BORDER}${T_SEP}${RESET} "
 printf "${T_ACCENT1}Model:${RESET} ${T_VALUE}${model_name}${RESET} ${T_BORDER}${T_SEP}${RESET} "
 printf "${T_ACCENT1}Skills:${RESET} ${T_VALUE}${skills_count}${RESET} ${T_BORDER}${T_SEP}${RESET} "
 printf "${T_ACCENT1}MCP:${RESET} ${T_VALUE}${mcp_count}${RESET}\n"
@@ -856,18 +858,20 @@ usage_7d_int="${usage_7d%%.*}"
 usage_5h_int="${usage_5h_int:-0}"
 usage_7d_int="${usage_7d_int:-0}"
 
+# Colors: orange icon+label, cyan sub-labels, green values
 [ -n "$T_ICON_USE" ] && printf "${T_ACCENT2}${T_ICON_USE}${RESET} "
-printf "${T_ACCENT2}Usage:${RESET}   ${T_LABEL}Session:${RESET} ${u5h_color}${usage_5h_int}%%${RESET}"
-[ -n "$reset_5h" ] && printf " ${T_LABEL}(${reset_5h})${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Week:${RESET} ${u7d_color}${usage_7d_int}%%${RESET}"
-[ -n "$reset_7d" ] && printf " ${T_LABEL}(${reset_7d})${RESET}"
+printf "${T_ACCENT2}Usage:${RESET}   ${T_ACCENT3}Session:${RESET} ${u5h_color}${usage_5h_int}%%${RESET}"
+[ -n "$reset_5h" ] && printf " ${T_ACCENT4}(${reset_5h})${RESET}"
+printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Week:${RESET} ${u7d_color}${usage_7d_int}%%${RESET}"
+[ -n "$reset_7d" ] && printf " ${T_ACCENT4}(${reset_7d})${RESET}"
 printf "\n"
 
 # Line 6: Session — duration, turns, cost, agents
+# Colors: cyan icon+label, pink sub-labels, green values
 [ -n "$T_ICON_SES" ] && printf "${T_ACCENT3}${T_ICON_SES}${RESET} "
 printf "${T_ACCENT3}Session:${RESET} ${T_VALUE}${time_dur}${RESET}"
-[ "$turn_count" != "?" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Turns:${RESET} ${T_VALUE}${turn_count}${RESET}"
-[ -n "$cost_display" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Cost:${RESET} ${T_VALUE}${cost_display}${RESET}"
+[ "$turn_count" != "?" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Turns:${RESET} ${T_VALUE}${turn_count}${RESET}"
+[ -n "$cost_display" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Cost:${RESET} ${T_VALUE}${cost_display}${RESET}"
 if [ "$agent_count" -gt 0 ] 2>/dev/null; then
   printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Agents:${RESET} ${T_GREEN}${agent_count} active${RESET}"
 fi
@@ -878,10 +882,11 @@ sys_color_cpu=$(get_level_color "$(echo "$cpu_load" | awk '{printf "%.0f", $1 * 
 sys_color_mem=$(get_level_color "$mem_used_pct")
 sys_color_disk=$(get_level_color "$disk_usage")
 
-printf "${T_LABEL}System:${RESET}  "
-printf "${T_LABEL}CPU:${RESET} ${sys_color_cpu:-$T_VALUE}${cpu_load}${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Mem:${RESET} ${sys_color_mem:-$T_VALUE}${mem_display}${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Disk:${RESET} ${sys_color_disk:-$T_VALUE}${disk_display}${RESET}"
+# Colors: orange System: label, cyan sub-labels, red values
+printf "${T_ACCENT2}System:${RESET}  "
+printf "${T_ACCENT3}CPU:${RESET} ${sys_color_cpu:-$T_VALUE}${cpu_load}${RESET}"
+printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Mem:${RESET} ${sys_color_mem:-$T_VALUE}${mem_display}${RESET}"
+printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Disk:${RESET} ${sys_color_disk:-$T_VALUE}${disk_display}${RESET}"
 printf "\n"
 
 # Footer

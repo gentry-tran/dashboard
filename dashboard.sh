@@ -614,14 +614,19 @@ if [ -f "$WEATHER_CACHE" ]; then
   temp_c=$(jq -r '.current.temperature_2m // empty' "$WEATHER_CACHE" 2>/dev/null)
   weather_code=$(jq -r '.current.weather_code // 0' "$WEATHER_CACHE" 2>/dev/null)
   case "$weather_code" in
-    0) weather_desc="Clear" ;;
-    1|2|3) weather_desc="Cloudy" ;;
-    45|48) weather_desc="Foggy" ;;
-    51|53|55|56|57|61|63|65|66|67) weather_desc="Rainy" ;;
-    71|73|75|77) weather_desc="Snowy" ;;
-    80|81|82) weather_desc="Showers" ;;
-    85|86) weather_desc="Snow Showers" ;;
-    95|96|99) weather_desc="Thunderstorm" ;;
+    0) weather_desc="☀️ Clear" ;;
+    1|2|3) weather_desc="☁️ Cloudy" ;;
+    45|48) weather_desc="🌫️ Foggy" ;;
+    51|53|55) weather_desc="🌦️ Drizzle" ;;
+    56|57) weather_desc="🌧️ Freezing Drizzle" ;;
+    61|63|65) weather_desc="🌧️ Rainy" ;;
+    66|67) weather_desc="🌧️ Freezing Rain" ;;
+    71|73|75) weather_desc="🌨️ Snowy" ;;
+    77) weather_desc="❄️ Snow Grains" ;;
+    80|81|82) weather_desc="🌦️ Showers" ;;
+    85|86) weather_desc="🌨️ Snow Showers" ;;
+    95) weather_desc="⛈️ Thunderstorm" ;;
+    96|99) weather_desc="⛈️ Thunderstorm + Hail" ;;
     *) weather_desc="" ;;
   esac
 fi

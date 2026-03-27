@@ -4,12 +4,12 @@
 
 **A beautiful, themeable status line for [Claude Code](https://docs.anthropic.com/en/docs/claude-code)**
 
-15 themes including pop culture, anime, and classic developer aesthetics.
+19 themes including pop culture, anime, nature, and classic developer aesthetics.
 
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat&logo=gnubash&logoColor=white)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-D4A574?style=flat&logo=anthropic&logoColor=white)
 ![License](https://img.shields.io/github/license/gentry-tran/dashboard?style=flat&color=60A5FA)
-![Themes](https://img.shields.io/badge/Themes-15-8B5CF6?style=flat)
+![Themes](https://img.shields.io/badge/Themes-19-8B5CF6?style=flat)
 
 </div>
 
@@ -122,6 +122,20 @@ export DASHBOARD_THEME=cyberpunk
 #### Ghibli
 ![Ghibli](screenshots/ghibli.png)
 
+### Nature Themes
+
+#### Rainforest
+![Rainforest](screenshots/rainforest.png)
+
+#### Garden
+![Garden](screenshots/garden.png)
+
+#### Terrarium
+![Terrarium](screenshots/terrarium.png)
+
+#### Harvest
+![Harvest](screenshots/harvest.png)
+
 ## Theme List
 
 | Theme | Header Name | Style |
@@ -141,6 +155,10 @@ export DASHBOARD_THEME=cyberpunk
 | `blade-runner` | VOIGHT-KAMPFF | Rain neon, teal/orange/pink |
 | `one-piece` | LOG POSE | Gold, ocean blue, nautical |
 | `ghibli` | CATBUS | Forest green, warm brown, cream |
+| `rainforest` | RAINFOREST | Emerald, lime, golden sunlight, bark |
+| `garden` | GARDEN | Grass green, flower pink, sunny yellow, sky blue |
+| `terrarium` | TERRARIUM | Sage, moss, warm amber, glass blue |
+| `harvest` | HARVEST | Tomato red, carrot orange, lettuce green, eggplant |
 
 ## Configuration
 

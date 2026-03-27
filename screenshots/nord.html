@@ -1,27 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head><style>
-  body { background: #0d0d0d; margin: 0; padding: 0; }
-  .terminal { 
-    background: #0d0d0d; 
-    padding: 16px 20px; 
-    font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Menlo', monospace;
-    font-size: 14px; 
-    line-height: 1.6;
-    color: #ccc;
-    display: inline-block;
-    border-radius: 10px;
-    border: 1px solid #222;
-  }
+  body { background: transparent; margin: 0; padding: 8px; }
+  .window { background: #1e1e2e; border-radius: 10px; overflow: hidden; display: inline-block; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+  .titlebar { background: #313244; padding: 8px 12px; display: flex; gap: 6px; align-items: center; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #f38ba8; }
+  .dot-yellow { background: #f9e2af; }
+  .dot-green { background: #a6e3a1; }
+  .content { padding: 14px 18px; font-family: 'JetBrains Mono','Fira Code','SF Mono','Menlo',monospace; font-size: 13px; line-height: 1.6; }
   pre { margin: 0; white-space: pre; }
 </style></head>
-<body><div class="terminal"><pre><span style="color:#3b4252;">━━━━ </span><span style="color:#88c0d0;">DASHBOARD</span> <span style="color:#3b4252;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
-<span style="color:#b48ead;">Location:</span> <span style="color:#e5e9f0;">Denver</span><span style="color:#3b4252;">,</span> <span style="color:#b48ead;">Colorado</span> <span style="color:#3b4252;">│</span> <span style="color:#b48ead;">Time:</span> <span style="color:#d8dee9;">10:37 PM MDT</span> <span style="color:#3b4252;">│</span> <span style="color:#a3be8c;">9.7°C | 49.5°F ☁️ Cloudy</span>
+<body>
+<div class="window">
+  <div class="titlebar">
+    <div class="dot dot-red"></div>
+    <div class="dot dot-yellow"></div>
+    <div class="dot dot-green"></div>
+  </div>
+  <div class="content"><pre><span style="color:#3b4252;">━━━━ </span><span style="color:#88c0d0;">DASHBOARD</span> <span style="color:#3b4252;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span>
+<span style="color:#b48ead;">Location:</span> <span style="color:#e5e9f0;">Denver</span><span style="color:#3b4252;">,</span> <span style="color:#b48ead;">Colorado</span> <span style="color:#3b4252;">│</span> <span style="color:#b48ead;">Time:</span> <span style="color:#d8dee9;">10:42 PM MDT</span> <span style="color:#3b4252;">│</span> <span style="color:#a3be8c;">9.7°C | 49.5°F ☁️ Cloudy</span>
 <span style="color:#ebcb8b;">Claude Code v2.1.81</span> <span style="color:#3b4252;">│</span> <span style="color:#ebcb8b;">Model:</span> <span style="color:#d8dee9;">Opus 4.6 (1M)</span> <span style="color:#3b4252;">│</span> <span style="color:#ebcb8b;">Skills:</span> <span style="color:#d8dee9;">40</span> <span style="color:#3b4252;">│</span> <span style="color:#ebcb8b;">MCP:</span> <span style="color:#d8dee9;">0</span>
 <span style="color:#3b4252;">───────────────────────────────────────────────────────────────────────────</span>
 <span style="color:#81a1c1;">◉</span> <span style="color:#81a1c1;">Context:</span> <span style="color:#a3be8c;">████████</span><span style="color:#2e3440;">██████████████████████</span> <span style="color:#a3be8c;">29%</span> <span style="color:#4c566a;">(297k/1000k)</span> <span style="color:#3b4252;">│</span> <span style="color:#b48ead;">⏱</span> <span style="color:#d8dee9;">2h15m</span>
-<span style="color:#ebcb8b;">⚡</span> <span style="color:#ebcb8b;">Usage:</span>   <span style="color:#b48ead;">Session:</span> <span style="color:#a3be8c;">5%</span> <span style="color:#81a1c1;">(7h22m)</span> <span style="color:#3b4252;">│</span> <span style="color:#b48ead;">Week:</span> <span style="color:#a3be8c;">27%</span> <span style="color:#81a1c1;">(42h22m)</span>
+<span style="color:#ebcb8b;">⚡</span> <span style="color:#ebcb8b;">Usage:</span>   <span style="color:#b48ead;">Session:</span> <span style="color:#a3be8c;">6%</span> <span style="color:#81a1c1;">(7h17m)</span> <span style="color:#3b4252;">│</span> <span style="color:#b48ead;">Week:</span> <span style="color:#a3be8c;">27%</span> <span style="color:#81a1c1;">(42h17m)</span>
 <span style="color:#b48ead;">⬡</span> <span style="color:#b48ead;">Session:</span> <span style="color:#d8dee9;">2h15m</span> <span style="color:#3b4252;">│</span> <span style="color:#ebcb8b;">Turns:</span> <span style="color:#d8dee9;">47</span> <span style="color:#3b4252;">│</span> <span style="color:#ebcb8b;">Cost:</span> <span style="color:#d8dee9;">$4.27</span>
-<span style="color:#ebcb8b;">System:</span>  <span style="color:#b48ead;">CPU:</span> <span style="color:#bf616a;">3.19</span> <span style="color:#3b4252;">│</span> <span style="color:#b48ead;">Mem:</span> <span style="color:#bf616a;">8332MB free</span> <span style="color:#3b4252;">│</span> <span style="color:#b48ead;">Disk:</span> <span style="color:#a3be8c;">?</span>
-<span style="color:#3b4252;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span></pre></div></body>
+<span style="color:#ebcb8b;">System:</span>  <span style="color:#b48ead;">CPU:</span> <span style="color:#bf616a;">3.65</span> <span style="color:#3b4252;">│</span> <span style="color:#b48ead;">Mem:</span> <span style="color:#bf616a;">8340MB free</span> <span style="color:#3b4252;">│</span> <span style="color:#b48ead;">Disk:</span> <span style="color:#a3be8c;">?</span>
+<span style="color:#3b4252;">━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</span></pre></div>
+</div>
+</body>
 </html>

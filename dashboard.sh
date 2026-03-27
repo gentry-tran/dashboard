@@ -535,8 +535,116 @@ load_theme() {
       T_ICON_TIME="⏱"
       ;;
 
+    rainforest)
+      T_HEADER="RAINFOREST"
+      T_BORDER='\033[38;2;20;60;20m'
+      T_TITLE='\033[1;38;2;0;168;107m'         # emerald
+      T_LABEL='\033[1;38;2;50;205;50m'          # lime green
+      T_VALUE='\033[1;38;2;255;215;0m'          # golden sunlight
+      T_HIGHLIGHT='\033[1;38;2;0;168;107m'      # emerald
+      T_ACCENT1='\033[1;38;2;34;139;34m'        # forest green
+      T_ACCENT2='\033[1;38;2;139;69;19m'        # bark brown
+      T_ACCENT3='\033[1;38;2;50;205;50m'        # lime green
+      T_ACCENT4='\033[1;38;2;0;168;107m'        # emerald
+      T_GREEN='\033[1;38;2;50;205;50m'
+      T_YELLOW='\033[1;38;2;255;215;0m'
+      T_RED='\033[1;38;2;255;99;71m'
+      T_DIM='\033[38;2;15;45;15m'
+      T_WEATHER='\033[1;38;2;0;168;107m'
+      T_SEP="│"
+      T_LINE_H="─"
+      T_LINE_TOP="━"
+      T_BAR_FILL="█"
+      T_BAR_EMPTY="░"
+      T_ICON_CTX="🌿"
+      T_ICON_USE="🌱"
+      T_ICON_SES="🍃"
+      T_ICON_TIME="☀"
+      ;;
+
+    garden)
+      T_HEADER="GARDEN"
+      T_BORDER='\033[38;2;60;90;40m'
+      T_TITLE='\033[1;38;2;255;105;180m'        # flower pink
+      T_LABEL='\033[1;38;2;144;238;144m'         # soft grass
+      T_VALUE='\033[1;38;2;255;224;102m'         # sunny yellow
+      T_HIGHLIGHT='\033[1;38;2;255;105;180m'     # flower pink
+      T_ACCENT1='\033[1;38;2;255;105;180m'       # flower pink
+      T_ACCENT2='\033[1;38;2;135;206;235m'       # sky blue
+      T_ACCENT3='\033[1;38;2;144;238;144m'       # soft grass
+      T_ACCENT4='\033[1;38;2;135;206;235m'       # sky blue
+      T_GREEN='\033[1;38;2;144;238;144m'
+      T_YELLOW='\033[1;38;2;255;224;102m'
+      T_RED='\033[1;38;2;255;105;180m'
+      T_DIM='\033[38;2;40;65;30m'
+      T_WEATHER='\033[1;38;2;135;206;235m'
+      T_SEP="│"
+      T_LINE_H="─"
+      T_LINE_TOP="─"
+      T_BAR_FILL="█"
+      T_BAR_EMPTY="░"
+      T_ICON_CTX="🌻"
+      T_ICON_USE="🌷"
+      T_ICON_SES="🪴"
+      T_ICON_TIME="☀"
+      ;;
+
+    terrarium)
+      T_HEADER="TERRARIUM"
+      T_BORDER='\033[38;2;50;60;40m'
+      T_TITLE='\033[1;38;2;143;188;143m'        # sage
+      T_LABEL='\033[1;38;2;79;121;66m'           # fern
+      T_VALUE='\033[1;38;2;218;165;32m'          # warm amber
+      T_HIGHLIGHT='\033[1;38;2;143;188;143m'     # sage
+      T_ACCENT1='\033[1;38;2;85;107;47m'         # dark olive
+      T_ACCENT2='\033[1;38;2;218;165;32m'        # warm amber
+      T_ACCENT3='\033[1;38;2;143;188;143m'       # sage
+      T_ACCENT4='\033[1;38;2;176;224;230m'       # glass blue
+      T_GREEN='\033[1;38;2;143;188;143m'
+      T_YELLOW='\033[1;38;2;218;165;32m'
+      T_RED='\033[1;38;2;205;133;63m'
+      T_DIM='\033[38;2;35;45;30m'
+      T_WEATHER='\033[1;38;2;176;224;230m'
+      T_SEP="│"
+      T_LINE_H="─"
+      T_LINE_TOP="─"
+      T_BAR_FILL="█"
+      T_BAR_EMPTY="░"
+      T_ICON_CTX="🌵"
+      T_ICON_USE="🍀"
+      T_ICON_SES="🪴"
+      T_ICON_TIME="⏱"
+      ;;
+
+    harvest)
+      T_HEADER="HARVEST"
+      T_BORDER='\033[38;2;80;50;20m'
+      T_TITLE='\033[1;38;2;255;99;71m'          # tomato red
+      T_LABEL='\033[1;38;2;255;165;0m'           # orange (carrot)
+      T_VALUE='\033[1;38;2;124;252;0m'           # lime green (lettuce)
+      T_HIGHLIGHT='\033[1;38;2;255;99;71m'       # tomato red
+      T_ACCENT1='\033[1;38;2;148;103;189m'       # eggplant purple
+      T_ACCENT2='\033[1;38;2;255;215;0m'         # lemon yellow
+      T_ACCENT3='\033[1;38;2;255;165;0m'         # carrot orange
+      T_ACCENT4='\033[1;38;2;124;252;0m'         # lettuce green
+      T_GREEN='\033[1;38;2;124;252;0m'
+      T_YELLOW='\033[1;38;2;255;215;0m'
+      T_RED='\033[1;38;2;255;99;71m'
+      T_DIM='\033[38;2;60;35;15m'
+      T_WEATHER='\033[1;38;2;255;215;0m'
+      T_SEP="│"
+      T_LINE_H="─"
+      T_LINE_TOP="━"
+      T_BAR_FILL="█"
+      T_BAR_EMPTY="░"
+      T_ICON_CTX="🍅"
+      T_ICON_USE="🥕"
+      T_ICON_SES="🍋"
+      T_ICON_TIME="🍊"
+      ;;
+
     *)
-      echo "Unknown theme: $theme. Available: terminal-green, solarized, nord, cyberpunk, minimal, batman, iron-man, dbz, evangelion, ghost-in-shell, akira, spider-verse, blade-runner, one-piece, ghibli" >&2
+      echo "Unknown theme: $theme. Available: terminal-green, solarized, nord, cyberpunk, minimal, batman, iron-man, dbz, evangelion, ghost-in-shell, akira, spider-verse, blade-runner, one-piece, ghibli, rainforest, garden, terrarium, harvest" >&2
       THEME="cyberpunk"
       load_theme "cyberpunk"
       return

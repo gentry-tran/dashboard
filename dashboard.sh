@@ -210,10 +210,10 @@ load_theme() {
       T_BORDER='\033[38;2;40;0;60m'
       T_TITLE='\033[1;38;2;255;45;149m'
       T_LABEL='\033[38;2;130;0;180m'
-      T_VALUE='\033[38;2;220;200;140m'
+      T_VALUE='\033[1;38;2;240;230;200m'
       T_HIGHLIGHT='\033[1;38;2;0;240;255m'
       T_ACCENT1='\033[1;38;2;255;45;149m'  # hot pink
-      T_ACCENT2='\033[38;2;220;200;140m'   # soft gold (was neon yellow)
+      T_ACCENT2='\033[1;38;2;240;230;200m'  # bold warm white (was neon yellow)
       T_ACCENT3='\033[38;2;0;240;255m'     # electric cyan
       T_ACCENT4='\033[38;2;130;0;180m'     # purple
       T_GREEN='\033[1;38;2;0;240;255m'

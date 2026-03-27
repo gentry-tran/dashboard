@@ -210,7 +210,7 @@ load_theme() {
       T_BORDER='\033[38;2;60;0;80m'
       T_TITLE='\033[1;38;2;255;45;149m'       # hot pink - header
       T_LABEL='\033[38;2;191;64;255m'          # neon violet - labels
-      T_VALUE='\033[1;38;2;0;240;255m'         # electric cyan - values
+      T_VALUE='\033[1;38;2;57;255;20m'          # acid green - values
       T_HIGHLIGHT='\033[1;38;2;0;240;255m'      # electric cyan - highlights
       T_ACCENT1='\033[1;38;2;255;45;149m'      # hot pink - section icons
       T_ACCENT2='\033[1;38;2;255;107;43m'      # neon orange - usage

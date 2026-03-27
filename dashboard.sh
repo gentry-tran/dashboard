@@ -992,8 +992,11 @@ printf "\n"
 printf "${T_ACCENT3}Session:${RESET} ${T_VALUE}${time_dur}${RESET}"
 [ "$turn_count" != "?" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Turns:${RESET} ${T_VALUE}${turn_count}${RESET}"
 [ -n "$cost_display" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Cost:${RESET} ${T_VALUE}${cost_display}${RESET}"
+printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Agents:${RESET} "
 if [ "$agent_count" -gt 0 ] 2>/dev/null; then
-  printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Agents:${RESET} ${T_GREEN}${agent_count}${RESET} ${T_VALUE}${agent_names}${RESET}"
+  printf "${T_GREEN}${agent_count}${RESET} ${T_VALUE}${agent_names}${RESET}"
+else
+  printf "${T_DIM}None${RESET}"
 fi
 printf "\n"
 

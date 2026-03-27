@@ -214,7 +214,7 @@ load_theme() {
       T_HIGHLIGHT='\033[1;38;2;255;30;30m'       # neon red - highlights
       T_ACCENT1='\033[1;38;2;255;45;149m'      # hot pink - section icons
       T_ACCENT2='\033[1;38;2;255;107;43m'      # neon orange - usage
-      T_ACCENT3='\033[1;38;2;0;240;255m'       # electric cyan - session
+      T_ACCENT3='\033[1;38;2;200;20;20m'        # dark neon red - session + clock
       T_ACCENT4='\033[38;2;191;64;255m'        # neon violet - context
       T_GREEN='\033[1;38;2;200;20;20m'          # dark neon red - low
       T_YELLOW='\033[1;38;2;255;107;43m'       # neon orange - medium

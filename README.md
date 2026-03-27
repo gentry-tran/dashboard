@@ -71,250 +71,56 @@ export DASHBOARD_THEME=cyberpunk
 
 ### Standard Themes
 
-<details open>
-<summary><strong>Terminal Green</strong> -- Classic hacker aesthetic. Monochrome green.</summary>
+#### Cyberpunk (default)
+![Cyberpunk](screenshots/cyberpunk.png)
 
-```
-─── DASHBOARD ─────────────────────────────────────────────────────
-Location: Denver, Colorado │ Time: 9:49 PM MDT │ 10.3°C Cloudy
-Claude Code v2.1.81 │ Model: Opus 4.6 (1M) │ Skills: 68 │ MCP: 3
-───────────────────────────────────────────────────────────────────
-Context: [######..............................] 11% (117k/1000k) │ 45s
-Usage:   Session: 3% (8h10m) │ Week: 27% (43h10m)
-Session: 2h 14m
-───────────────────────────────────────────────────────────────────
-```
+#### Terminal Green
+![Terminal Green](screenshots/terminal-green.png)
 
-</details>
+#### Solarized
+![Solarized](screenshots/solarized.png)
 
-<details>
-<summary><strong>Solarized</strong> -- Ethan Schoonover's palette. Warm and readable.</summary>
+#### Nord
+![Nord](screenshots/nord.png)
 
-```
-━━━━ DASHBOARD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Location: Denver, Colorado │ Time: 9:49 PM MDT │ 10.3°C Cloudy
-Claude Code v2.1.81 │ Model: Opus 4.6 (1M) │ Skills: 68 │ MCP: 3
-──────────────────────────────────────────────────────────────────
-◉ Context: ██████░░░░░░░░░░░░░░░░░░░░░░ 11% (117k/1000k) │ 45s
-⚡ Usage:   Session: 3% (8h10m) │ Week: 27% (43h10m)
-⬡ Session: 2h 14m
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-</details>
-
-<details>
-<summary><strong>Nord</strong> -- Arctic cool-toned. Frost blues and aurora greens.</summary>
-
-```
-━━━━ DASHBOARD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Location: Denver, Colorado │ Time: 9:49 PM MDT │ 10.3°C Cloudy
-Claude Code v2.1.81 │ Model: Opus 4.6 (1M) │ Skills: 68 │ MCP: 3
-──────────────────────────────────────────────────────────────────
-◉ Context: ██████░░░░░░░░░░░░░░░░░░░░░░ 11% (117k/1000k) │ 45s
-⚡ Usage:   Session: 3% (8h10m) │ Week: 27% (43h10m)
-⬡ Session: 2h 14m
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-</details>
-
-<details>
-<summary><strong>Cyberpunk</strong> -- Hot pink, electric cyan, neon yellow on deep purple.</summary>
-
-```
-╔══ DASHBOARD ════════════════════════════════════════════════════╗
-Location: Denver, Colorado ║ Time: 9:49 PM MDT ║ 10.3°C Cloudy
-Claude Code v2.1.81 ║ Model: Opus 4.6 (1M) ║ Skills: 68 ║ MCP: 3
-╠═════════════════════════════════════════════════════════════════╣
-◉ Context: ▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░ 11% (117k/1000k) ║ 45s
-⚡ Usage:   Session: 3% (8h10m) ║ Week: 27% (43h10m)
-⬡ Session: 2h 14m
-╚═════════════════════════════════════════════════════════════════╝
-```
-
-</details>
-
-<details>
-<summary><strong>Minimal</strong> -- No borders, no icons. Just the data.</summary>
-
-```
-DASHBOARD
-Denver, Colorado  Time: 9:49 PM MDT  10.3°C Cloudy
-Claude Code v2.1.81  Opus 4.6 (1M)  68 skills  3 mcp
-· · · · · · · · · · · · · · · · · · · · · · · · · · ·
-Context  11% 117k/1000k  45s
-Usage    5h: 3% (8h10m)  7d: 27% (43h10m)
-Session  2h 14m
-```
-
-</details>
+#### Minimal
+![Minimal](screenshots/minimal.png)
 
 ### Superhero Themes
 
-<details>
-<summary><strong>Batman</strong> -- Gotham dark grays with Bat-yellow accents.</summary>
+#### Batman
+![Batman](screenshots/batman.png)
 
-```
-━━━━ BATCOMPUTER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Location: Denver, Colorado │ Time: 9:49 PM MDT │ 10.3°C Cloudy
-Claude Code v2.1.81 │ Model: Opus 4.6 (1M) │ Skills: 68 │ MCP: 3
-──────────────────────────────────────────────────────────────────
-🦇 Context: ██████░░░░░░░░░░░░░░░░░░░░░░ 11% (117k/1000k) │ 45s
-⚡ Usage:   Session: 3% (8h10m) │ Week: 27% (43h10m)
-◆ Session: 2h 14m
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-</details>
-
-<details>
-<summary><strong>Iron Man</strong> -- Arc reactor blue, gold, HUD aesthetic.</summary>
-
-```
-━━━━ J.A.R.V.I.S. ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Location: Denver, Colorado │ Time: 9:49 PM MDT │ 10.3°C Cloudy
-Claude Code v2.1.81 │ Model: Opus 4.6 (1M) │ Skills: 68 │ MCP: 3
-═════════════════════════════════════════════════════════════════
-⊕ Context: ██████░░░░░░░░░░░░░░░░░░░░░░ 11% (117k/1000k) │ 45s
-⚡ Usage:   Session: 3% (8h10m) │ Week: 27% (43h10m)
-◈ Session: 2h 14m
-═════════════════════════════════════════════════════════════════
-```
-
-</details>
+#### Iron Man
+![Iron Man](screenshots/iron-man.png)
 
 ### Anime Themes
 
-<details>
-<summary><strong>Dragon Ball Z</strong> -- Power level orange/yellow. Ki diamond bars.</summary>
+#### Dragon Ball Z
+![Dragon Ball Z](screenshots/dbz.png)
 
-```
-━━━━ >>> SCOUTER <<< ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Location: Denver, Colorado │ Time: 9:49 PM MDT │ 10.3°C Cloudy
-Claude Code v2.1.81 │ Model: Opus 4.6 (1M) │ Skills: 68 │ MCP: 3
-──────────────────────────────────────────────────────────────────
-◆ Context: ◆◆◆◆◆◆◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇◇ 11% (117k/1000k) │ 45s
-⚡ Usage:   Session: 3% (8h10m) │ Week: 27% (43h10m)
-◈ Session: 2h 14m
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+#### Evangelion
+![Evangelion](screenshots/evangelion.png)
 
-</details>
+#### Ghost in the Shell
+![Ghost in the Shell](screenshots/ghost-in-shell.png)
 
-<details>
-<summary><strong>Evangelion</strong> -- NERV red, dark green, amber warnings.</summary>
-
-```
-━━━━ NERV MAGI SYSTEM ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Location: Denver, Colorado │ Time: 9:49 PM MDT │ 10.3°C Cloudy
-Claude Code v2.1.81 │ Model: Opus 4.6 (1M) │ Skills: 68 │ MCP: 3
-──────────────────────────────────────────────────────────────────
-⬡ Context: ██████░░░░░░░░░░░░░░░░░░░░░░ 11% (117k/1000k) │ 45s
-⚠ Usage:   Session: 3% (8h10m) │ Week: 27% (43h10m)
-◉ Session: 2h 14m
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-</details>
-
-<details>
-<summary><strong>Ghost in the Shell</strong> -- Cyan on navy. Glitch borders. Data streams.</summary>
-
-```
-━━━━ SECTION 9 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Location: Denver, Colorado ▐ Time: 9:49 PM MDT ▐ 10.3°C Cloudy
-Claude Code v2.1.81 ▐ Model: Opus 4.6 (1M) ▐ Skills: 68 ▐ MCP: 3
-▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌
->> Context: ▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░ 11% (117k/1000k) ▐ 45s
->> Usage:   Session: 3% (8h10m) ▐ Week: 27% (43h10m)
->> Session: 2h 14m
-▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐▐
-```
-
-</details>
-
-<details>
-<summary><strong>Akira</strong> -- Capsule red, white, dark blue. Neo-Tokyo aggressive.</summary>
-
-```
-━━━━ KANEDA /// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Location: Denver, Colorado │ Time: 9:49 PM MDT │ 10.3°C Cloudy
-Claude Code v2.1.81 │ Model: Opus 4.6 (1M) │ Skills: 68 │ MCP: 3
-──────────────────────────────────────────────────────────────────
-◉ Context: ██████░░░░░░░░░░░░░░░░░░░░░░ 11% (117k/1000k) │ 45s
-⚡ Usage:   Session: 3% (8h10m) │ Week: 27% (43h10m)
-◆ Session: 2h 14m
-═════════════════════════════════════════════════════════════════
-```
-
-</details>
+#### Akira
+![Akira](screenshots/akira.png)
 
 ### More Pop Culture Themes
 
-<details>
-<summary><strong>Spider-Verse</strong> -- Comic book red/blue with halftone dot bars.</summary>
+#### Spider-Verse
+![Spider-Verse](screenshots/spider-verse.png)
 
-```
-━━━━ SPIDER-VERSE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Location: Denver, Colorado │ Time: 9:49 PM MDT │ 10.3°C Cloudy
-Claude Code v2.1.81 │ Model: Opus 4.6 (1M) │ Skills: 68 │ MCP: 3
-╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
-◉ Context: ●●●●●●○○○○○○○○○○○○○○○○○○○○○○ 11% (117k/1000k) │ 45s
-⚡ Usage:   Session: 3% (8h10m) │ Week: 27% (43h10m)
-◆ Session: 2h 14m
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
+#### Blade Runner
+![Blade Runner](screenshots/blade-runner.png)
 
-</details>
+#### One Piece
+![One Piece](screenshots/one-piece.png)
 
-<details>
-<summary><strong>Blade Runner</strong> -- Rain-washed neon. Teal/orange/pink on charcoal.</summary>
-
-```
-━━━━ VOIGHT-KAMPFF ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Location: Denver, Colorado ┊ Time: 9:49 PM MDT ┊ 10.3°C Cloudy
-Claude Code v2.1.81 ┊ Model: Opus 4.6 (1M) ┊ Skills: 68 ┊ MCP: 3
-┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-◉ Context: ██████░░░░░░░░░░░░░░░░░░░░░░ 11% (117k/1000k) ┊ 45s
-⚡ Usage:   Session: 3% (8h10m) ┊ Week: 27% (43h10m)
-◇ Session: 2h 14m
-┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄
-```
-
-</details>
-
-<details>
-<summary><strong>One Piece</strong> -- Gold and ocean blue. Nautical with anchor icons.</summary>
-
-```
-━━━━ LOG POSE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Location: Denver, Colorado │ Time: 9:49 PM MDT │ 10.3°C Cloudy
-Claude Code v2.1.81 │ Model: Opus 4.6 (1M) │ Skills: 68 │ MCP: 3
-──────────────────────────────────────────────────────────────────
-⚓ Context: ██████░░░░░░░░░░░░░░░░░░░░░░ 11% (117k/1000k) │ 45s
-⚡ Usage:   Session: 3% (8h10m) │ Week: 27% (43h10m)
-☠ Session: 2h 14m
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-```
-
-</details>
-
-<details>
-<summary><strong>Ghibli</strong> -- Soft forest greens, warm browns, cream. Peaceful.</summary>
-
-```
-──── CATBUS ────────────────────────────────────────────────────
-Location: Denver, Colorado │ Time: 9:49 PM MDT │ 10.3°C Cloudy
-Claude Code v2.1.81 │ Model: Opus 4.6 (1M) │ Skills: 68 │ MCP: 3
-───────────────────────────────────────────────────────────────────
-🌿 Context: ██████░░░░░░░░░░░░░░░░░░░░░░ 11% (117k/1000k) │ 45s
-✧ Usage:   Session: 3% (8h10m) │ Week: 27% (43h10m)
-🍃 Session: 2h 14m
-───────────────────────────────────────────────────────────────────
-```
-
-</details>
+#### Ghibli
+![Ghibli](screenshots/ghibli.png)
 
 ## Theme List
 

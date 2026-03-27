@@ -211,7 +211,7 @@ load_theme() {
       T_TITLE='\033[1;38;2;255;45;149m'       # hot pink - header
       T_LABEL='\033[38;2;191;64;255m'          # neon violet - labels
       T_VALUE='\033[1;38;2;57;255;20m'          # acid green - values
-      T_HIGHLIGHT='\033[1;38;2;0;240;255m'      # electric cyan - highlights
+      T_HIGHLIGHT='\033[1;38;2;255;30;30m'       # neon red - highlights
       T_ACCENT1='\033[1;38;2;255;45;149m'      # hot pink - section icons
       T_ACCENT2='\033[1;38;2;255;107;43m'      # neon orange - usage
       T_ACCENT3='\033[1;38;2;0;240;255m'       # electric cyan - session
@@ -220,7 +220,7 @@ load_theme() {
       T_YELLOW='\033[1;38;2;255;107;43m'       # neon orange - medium
       T_RED='\033[1;38;2;255;45;149m'          # hot pink - high
       T_DIM='\033[38;2;40;0;55m'
-      T_WEATHER='\033[1;38;2;0;240;255m'       # electric cyan - weather
+      T_WEATHER='\033[1;38;2;255;30;30m'        # neon red - weather
       T_SEP="║"
       T_LINE_H="═"
       T_LINE_TOP="═"

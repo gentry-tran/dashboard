@@ -216,7 +216,7 @@ load_theme() {
       T_ACCENT2='\033[1;38;2;255;107;43m'      # neon orange - usage
       T_ACCENT3='\033[1;38;2;0;240;255m'       # electric cyan - session
       T_ACCENT4='\033[38;2;191;64;255m'        # neon violet - context
-      T_GREEN='\033[1;38;2;0;240;255m'         # electric cyan - low
+      T_GREEN='\033[1;38;2;200;20;20m'          # dark neon red - low
       T_YELLOW='\033[1;38;2;255;107;43m'       # neon orange - medium
       T_RED='\033[1;38;2;255;45;149m'          # hot pink - high
       T_DIM='\033[38;2;40;0;55m'

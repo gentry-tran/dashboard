@@ -215,11 +215,11 @@ load_theme() {
       T_HEADER="DASHBOARD"
       T_BORDER='\033[38;2;60;0;80m'
       T_TITLE='\033[1;38;2;255;45;149m'        # 1 hot pink
-      T_LABEL='\033[1;38;2;255;107;43m'        # 4 neon orange - all labels
+      T_LABEL='\033[1;38;2;255;45;149m'         # 1 hot pink - all labels
       T_VALUE='\033[1;38;2;57;255;20m'         # 3 acid green - all values
       T_HIGHLIGHT='\033[1;38;2;255;30;30m'     # 2 neon red - city, weather
       T_ACCENT1='\033[1;38;2;255;45;149m'      # 1 hot pink - Model:/Skills:/MCP:
-      T_ACCENT2='\033[1;38;2;0;240;255m'       # 5 electric cyan - usage section
+      T_ACCENT2='\033[1;38;2;255;107;43m'      # 4 neon orange - usage icon + label only
       T_ACCENT3='\033[1;38;2;0;240;255m'       # 5 electric cyan - session section
       T_ACCENT4='\033[1;38;2;0;240;255m'       # 5 electric cyan - context section
       T_GREEN='\033[1;38;2;57;255;20m'         # 3 acid green - low usage

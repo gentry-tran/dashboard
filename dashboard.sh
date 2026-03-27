@@ -206,21 +206,27 @@ load_theme() {
       ;;
 
     cyberpunk)
+      # 5 NEON COLORS:
+      #   1. Hot Pink  255;45;149  — headers, high-priority labels
+      #   2. Neon Red  255;30;30   — location, weather, highlights
+      #   3. Acid Green 57;255;20  — data values (model, turns, cost, duration)
+      #   4. Neon Orange 255;107;43 — usage, percentages, system stats
+      #   5. Electric Cyan 0;240;255 — context, session, time
       T_HEADER="DASHBOARD"
       T_BORDER='\033[38;2;60;0;80m'
-      T_TITLE='\033[1;38;2;255;45;149m'       # hot pink - header
-      T_LABEL='\033[38;2;191;64;255m'          # neon violet - labels
-      T_VALUE='\033[1;38;2;57;255;20m'          # acid green - values
-      T_HIGHLIGHT='\033[1;38;2;255;30;30m'       # neon red - highlights
-      T_ACCENT1='\033[1;38;2;255;45;149m'      # hot pink - section icons
-      T_ACCENT2='\033[1;38;2;255;107;43m'      # neon orange - usage
-      T_ACCENT3='\033[1;38;2;200;20;20m'        # dark neon red - session + clock
-      T_ACCENT4='\033[38;2;191;64;255m'        # neon violet - context
-      T_GREEN='\033[1;38;2;200;20;20m'          # dark neon red - low
-      T_YELLOW='\033[1;38;2;255;107;43m'       # neon orange - medium
-      T_RED='\033[1;38;2;255;45;149m'          # hot pink - high
+      T_TITLE='\033[1;38;2;255;45;149m'        # 1 hot pink
+      T_LABEL='\033[1;38;2;255;107;43m'        # 4 neon orange - all labels
+      T_VALUE='\033[1;38;2;57;255;20m'         # 3 acid green - all values
+      T_HIGHLIGHT='\033[1;38;2;255;30;30m'     # 2 neon red - city, weather
+      T_ACCENT1='\033[1;38;2;255;45;149m'      # 1 hot pink - Model:/Skills:/MCP:
+      T_ACCENT2='\033[1;38;2;0;240;255m'       # 5 electric cyan - usage section
+      T_ACCENT3='\033[1;38;2;0;240;255m'       # 5 electric cyan - session section
+      T_ACCENT4='\033[1;38;2;0;240;255m'       # 5 electric cyan - context section
+      T_GREEN='\033[1;38;2;57;255;20m'         # 3 acid green - low usage
+      T_YELLOW='\033[1;38;2;255;107;43m'       # 4 neon orange - medium usage
+      T_RED='\033[1;38;2;255;30;30m'           # 2 neon red - high usage
       T_DIM='\033[38;2;40;0;55m'
-      T_WEATHER='\033[1;38;2;255;30;30m'        # neon red - weather
+      T_WEATHER='\033[1;38;2;255;30;30m'       # 2 neon red - weather
       T_SEP="║"
       T_LINE_H="═"
       T_LINE_TOP="═"

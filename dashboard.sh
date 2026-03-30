@@ -106,9 +106,9 @@ eval "$(echo "$input" | jq -r '
   "context_max=" + (.context_window.context_window_size // 0 | tostring) + "\n" +
   "context_used_pct=" + (.context_window.used_percentage // "" | tostring) + "\n" +
   "rl_5h_pct=" + (.rate_limits.five_hour.used_percentage // "" | tostring) + "\n" +
-  "rl_5h_reset=" + (.rate_limits.five_hour.resets_at // "" | @sh) + "\n" +
+  "rl_5h_reset=" + (.rate_limits.five_hour.resets_at // "" | tostring) + "\n" +
   "rl_7d_pct=" + (.rate_limits.seven_day.used_percentage // "" | tostring) + "\n" +
-  "rl_7d_reset=" + (.rate_limits.seven_day.resets_at // "" | @sh)
+  "rl_7d_reset=" + (.rate_limits.seven_day.resets_at // "" | tostring)
 ' 2>/dev/null)"
 
 # Defaults for empty values
@@ -774,13 +774,17 @@ fi
 [ -n "$rl_5h_reset" ] && usage_5h_reset="$rl_5h_reset"
 [ -n "$rl_7d_reset" ] && usage_7d_reset="$rl_7d_reset"
 
-# Parse ISO 8601 timestamp to epoch (handles UTC offset correctly)
+# Parse timestamp to epoch — handles unix epoch (from stdin) and ISO 8601 (from API cache)
 parse_iso_epoch() {
   local ts="$1"
   [ -z "$ts" ] && return 1
-  # Strip fractional seconds but keep timezone offset: "2026-03-30T06:59:59.980+00:00" -> "2026-03-30T06:59:59+00:00"
+  # If it's already a unix epoch (all digits), return as-is
+  if [[ "$ts" =~ ^[0-9]+$ ]]; then
+    echo "$ts"
+    return 0
+  fi
+  # ISO 8601: strip fractional seconds, parse as UTC
   local clean=$(echo "$ts" | sed 's/\.[0-9]*//;s/+00:00/Z/;s/Z$//')
-  # Parse as UTC by temporarily setting TZ
   TZ=UTC date -jf "%Y-%m-%dT%H:%M:%S" "$clean" "+%s" 2>/dev/null && return
   date -d "$ts" "+%s" 2>/dev/null && return
   return 1

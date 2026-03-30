@@ -103,7 +103,12 @@ eval "$(echo "$input" | jq -r '
   "input_tokens=" + ((.context_window.current_usage.input_tokens // 0) | tostring) + "\n" +
   "cache_creation=" + ((.context_window.current_usage.cache_creation_input_tokens // 0) | tostring) + "\n" +
   "output_tokens=" + ((.context_window.current_usage.output_tokens // 0) | tostring) + "\n" +
-  "context_max=" + (.context_window.context_window_size // 0 | tostring)
+  "context_max=" + (.context_window.context_window_size // 0 | tostring) + "\n" +
+  "context_used_pct=" + (.context_window.used_percentage // "" | tostring) + "\n" +
+  "rl_5h_pct=" + (.rate_limits.five_hour.used_percentage // "" | tostring) + "\n" +
+  "rl_5h_reset=" + (.rate_limits.five_hour.resets_at // "" | @sh) + "\n" +
+  "rl_7d_pct=" + (.rate_limits.seven_day.used_percentage // "" | tostring) + "\n" +
+  "rl_7d_reset=" + (.rate_limits.seven_day.resets_at // "" | @sh)
 ' 2>/dev/null)"
 
 # Defaults for empty values
@@ -689,8 +694,10 @@ fetch_weather() {
   fi
 }
 
-# Usage (cached, Anthropic API)
+# Usage — prefer stdin rate_limits from Claude Code, fallback to cached API
 fetch_usage() {
+  # Only fetch from API if Claude Code didn't provide rate_limits in stdin
+  [ -n "$rl_5h_pct" ] && return
   local cache_age=999999
   [ -f "$USAGE_CACHE" ] && cache_age=$(($(date +%s) - $(stat -f %m "$USAGE_CACHE" 2>/dev/null || stat -c %Y "$USAGE_CACHE" 2>/dev/null || echo 0)))
   if [ "$cache_age" -gt "$USAGE_CACHE_TTL" ]; then
@@ -748,9 +755,15 @@ if [ -n "$temp_c" ]; then
   temp_f=$(echo "$temp_c" | awk '{printf "%.1f", $1 * 9/5 + 32}')
 fi
 
-# Parse usage
-usage_5h="" usage_7d="" reset_5h="" reset_7d=""
-if [ -f "$USAGE_CACHE" ]; then
+# Parse usage — prefer stdin rate_limits, fallback to cached API
+usage_5h="" usage_7d="" usage_5h_reset="" usage_7d_reset=""
+if [ -n "$rl_5h_pct" ]; then
+  # Claude Code provided rate_limits in stdin — use directly (always fresh)
+  usage_5h="$rl_5h_pct"
+  usage_7d="${rl_7d_pct:-0}"
+  usage_5h_reset="$rl_5h_reset"
+  usage_7d_reset="$rl_7d_reset"
+elif [ -f "$USAGE_CACHE" ]; then
   usage_5h=$(jq -r '.five_hour.utilization // empty' "$USAGE_CACHE" 2>/dev/null)
   usage_7d=$(jq -r '.seven_day.utilization // empty' "$USAGE_CACHE" 2>/dev/null)
   usage_5h_reset=$(jq -r '.five_hour.resets_at // empty' "$USAGE_CACHE" 2>/dev/null)
@@ -897,16 +910,18 @@ else
   cost_display=""
 fi
 
-# Context calculations
+# Context calculations — prefer Claude Code's used_percentage, fallback to manual
 content_tokens=$((cache_read + input_tokens + cache_creation + output_tokens))
 context_used=$((content_tokens + CONTEXT_BASELINE))
+max_k=$((context_max / 1000))
+context_k=$((context_used / 1000))
 
-if [ "$context_max" -gt 0 ] && [ "$context_used" -gt 0 ]; then
+if [ -n "$context_used_pct" ] && [ "$context_used_pct" != "null" ] && [ "$context_used_pct" != "" ]; then
+  context_pct="${context_used_pct%%.*}"
+elif [ "$context_max" -gt 0 ] && [ "$context_used" -gt 0 ]; then
   context_pct=$((context_used * 100 / context_max))
-  context_k=$((context_used / 1000))
-  max_k=$((context_max / 1000))
 else
-  context_pct=0; context_k=0; max_k=0
+  context_pct=0
 fi
 
 # Duration

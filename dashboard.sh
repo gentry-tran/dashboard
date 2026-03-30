@@ -757,28 +757,52 @@ if [ -f "$USAGE_CACHE" ]; then
   usage_7d_reset=$(jq -r '.seven_day.resets_at // empty' "$USAGE_CACHE" 2>/dev/null)
 fi
 
-# Format reset times
+# Format reset times — relative (e.g., "2h30m" or "5d17h")
 format_reset() {
   local reset_ts="$1"
   [ -z "$reset_ts" ] && return
   local reset_epoch
-  # macOS
   reset_epoch=$(date -jf "%Y-%m-%dT%H:%M:%S" "${reset_ts%%.*}" "+%s" 2>/dev/null)
-  # Linux fallback
   [ -z "$reset_epoch" ] && reset_epoch=$(date -d "${reset_ts}" "+%s" 2>/dev/null)
   [ -z "$reset_epoch" ] && return
   local now_epoch=$(date +%s)
   local diff=$(( reset_epoch - now_epoch ))
   [ "$diff" -lt 0 ] && diff=0
-  local hours=$(( diff / 3600 ))
+  local days=$(( diff / 86400 ))
+  local hours=$(( (diff % 86400) / 3600 ))
   local mins=$(( (diff % 3600) / 60 ))
-  if [ "$hours" -gt 0 ]; then echo "${hours}h${mins}m"
+  if [ "$days" -gt 0 ]; then echo "${days}d${hours}h"
+  elif [ "$hours" -gt 0 ]; then echo "${hours}h${mins}m"
   else echo "${mins}m"
+  fi
+}
+
+# Format reset times — absolute day + time (e.g., "8:30 PM" or "Wed 8:00 AM")
+format_reset_abs() {
+  local reset_ts="$1"
+  [ -z "$reset_ts" ] && return
+  local reset_epoch
+  reset_epoch=$(date -jf "%Y-%m-%dT%H:%M:%S" "${reset_ts%%.*}" "+%s" 2>/dev/null)
+  [ -z "$reset_epoch" ] && reset_epoch=$(date -d "${reset_ts}" "+%s" 2>/dev/null)
+  [ -z "$reset_epoch" ] && return
+  local now_day=$(date +%Y%j)
+  local reset_day
+  reset_day=$(date -r "$reset_epoch" +%Y%j 2>/dev/null) || reset_day=$(date -d "@$reset_epoch" +%Y%j 2>/dev/null)
+  if [ "$now_day" = "$reset_day" ]; then
+    # Today — just show time
+    date -r "$reset_epoch" "+%l:%M %p" 2>/dev/null | sed 's/^ *//' || \
+    date -d "@$reset_epoch" "+%-I:%M %p" 2>/dev/null
+  else
+    # Different day — show day name + time
+    date -r "$reset_epoch" "+%a %l:%M %p" 2>/dev/null | sed 's/  / /' || \
+    date -d "@$reset_epoch" "+%a %-I:%M %p" 2>/dev/null
   fi
 }
 
 reset_5h=$(format_reset "$usage_5h_reset")
 reset_7d=$(format_reset "$usage_7d_reset")
+reset_5h_abs=$(format_reset_abs "$usage_5h_reset")
+reset_7d_abs=$(format_reset_abs "$usage_7d_reset")
 
 # Format time with timezone
 tz_abbr=$(date +%Z)
@@ -804,10 +828,24 @@ if command -v vm_stat >/dev/null 2>&1; then
   total_mem_mb=$(( $(sysctl -n hw.memsize 2>/dev/null || echo 0) / 1048576 ))
   mem_used_pct=0
   [ "$total_mem_mb" -gt 0 ] && mem_used_pct=$(( (total_mem_mb - free_mem_mb) * 100 / total_mem_mb ))
-  mem_display="${free_mem_mb}MB free"
+  total_mem_gb=$(awk "BEGIN {printf \"%.0f\", $total_mem_mb / 1024}")
+  if [ "$free_mem_mb" -ge 1024 ]; then
+    free_mem_gb=$(awk "BEGIN {printf \"%.1f\", $free_mem_mb / 1024}")
+    mem_display="${free_mem_gb}/${total_mem_gb}GB free"
+  else
+    mem_display="${free_mem_mb}MB/${total_mem_gb}GB free"
+  fi
 else
   # Linux
-  mem_display=$(free -m 2>/dev/null | awk '/^Mem:/ {printf "%dMB free", $7}')
+  free_mem_mb_linux=$(free -m 2>/dev/null | awk '/^Mem:/ {print $7}')
+  total_mem_mb_linux=$(free -m 2>/dev/null | awk '/^Mem:/ {print $2}')
+  total_mem_gb_linux=$(awk "BEGIN {printf \"%.0f\", ${total_mem_mb_linux:-0} / 1024}")
+  if [ -n "$free_mem_mb_linux" ] && [ "$free_mem_mb_linux" -ge 1024 ] 2>/dev/null; then
+    free_mem_gb_linux=$(awk "BEGIN {printf \"%.1f\", $free_mem_mb_linux / 1024}")
+    mem_display="${free_mem_gb_linux}/${total_mem_gb_linux}GB free"
+  else
+    mem_display="${free_mem_mb_linux:-?}MB/${total_mem_gb_linux}GB free"
+  fi
   mem_used_pct=$(free 2>/dev/null | awk '/^Mem:/ {printf "%.0f", ($2-$7)*100/$2}')
 fi
 mem_used_pct="${mem_used_pct:-0}"
@@ -815,7 +853,7 @@ mem_display="${mem_display:-?}"
 
 # Disk usage of cwd
 disk_usage=$(df -h "${current_dir:-.}" 2>/dev/null | awk 'NR==2 {print $5}' | tr -d '%')
-disk_display=$(df -h "${current_dir:-.}" 2>/dev/null | awk 'NR==2 {printf "%s/%s (%s)", $3, $2, $5}')
+disk_display=$(df -h "${current_dir:-.}" 2>/dev/null | awk 'NR==2 {printf "%s free / %s", $4, $2}')
 disk_usage="${disk_usage:-0}"
 disk_display="${disk_display:-?}"
 
@@ -981,9 +1019,17 @@ usage_7d_int="${usage_7d_int:-0}"
 # Colors: orange icon+label, cyan sub-labels, green values
 [ -n "$T_ICON_USE" ] && printf "${T_ACCENT2}${T_ICON_USE}${RESET} "
 printf "${T_ACCENT2}Usage:${RESET}   ${T_ACCENT3}Session:${RESET} ${u5h_color}${usage_5h_int}%%${RESET}"
-[ -n "$reset_5h" ] && printf " ${T_ACCENT4}(${reset_5h})${RESET}"
+if [ -n "$reset_5h" ]; then
+  reset_5h_detail="${reset_5h}"
+  [ -n "$reset_5h_abs" ] && reset_5h_detail="${reset_5h}, ${reset_5h_abs}"
+  printf " ${T_ACCENT4}(${reset_5h_detail})${RESET}"
+fi
 printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Week:${RESET} ${u7d_color}${usage_7d_int}%%${RESET}"
-[ -n "$reset_7d" ] && printf " ${T_ACCENT4}(${reset_7d})${RESET}"
+if [ -n "$reset_7d" ]; then
+  reset_7d_detail="${reset_7d}"
+  [ -n "$reset_7d_abs" ] && reset_7d_detail="${reset_7d}, ${reset_7d_abs}"
+  printf " ${T_ACCENT4}(${reset_7d_detail})${RESET}"
+fi
 printf "\n"
 
 # Line 6: Session — duration, turns, cost, agents
@@ -1007,9 +1053,9 @@ sys_color_disk=$(get_level_color "$disk_usage")
 
 # Colors: orange System: label, cyan sub-labels, red values
 printf "${T_ACCENT2}System:${RESET}  "
-printf "${T_ACCENT3}CPU:${RESET} ${sys_color_cpu:-$T_VALUE}${cpu_load}${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Mem:${RESET} ${sys_color_mem:-$T_VALUE}${mem_display}${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Disk:${RESET} ${sys_color_disk:-$T_VALUE}${disk_display}${RESET}"
+printf "${T_ACCENT3}CPU:${RESET} ${sys_color_cpu:-$T_VALUE}%s${RESET}" "$cpu_load"
+printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Mem:${RESET} ${sys_color_mem:-$T_VALUE}%s${RESET}" "$mem_display"
+printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Disk:${RESET} ${sys_color_disk:-$T_VALUE}%s${RESET}" "$disk_display"
 printf "\n"
 
 # Footer

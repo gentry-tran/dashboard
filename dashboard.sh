@@ -757,13 +757,25 @@ if [ -f "$USAGE_CACHE" ]; then
   usage_7d_reset=$(jq -r '.seven_day.resets_at // empty' "$USAGE_CACHE" 2>/dev/null)
 fi
 
+# Parse ISO 8601 timestamp to epoch (handles UTC offset correctly)
+parse_iso_epoch() {
+  local ts="$1"
+  [ -z "$ts" ] && return 1
+  # Strip fractional seconds but keep timezone offset: "2026-03-30T06:59:59.980+00:00" -> "2026-03-30T06:59:59+00:00"
+  local clean=$(echo "$ts" | sed 's/\.[0-9]*//;s/+00:00/Z/;s/Z$//')
+  # Parse as UTC by temporarily setting TZ
+  TZ=UTC date -jf "%Y-%m-%dT%H:%M:%S" "$clean" "+%s" 2>/dev/null && return
+  date -d "$ts" "+%s" 2>/dev/null && return
+  return 1
+}
+
 # Format reset times — relative (e.g., "2h30m" or "5d17h")
 format_reset() {
   local reset_ts="$1"
   [ -z "$reset_ts" ] && return
   local reset_epoch
-  reset_epoch=$(date -jf "%Y-%m-%dT%H:%M:%S" "${reset_ts%%.*}" "+%s" 2>/dev/null)
-  [ -z "$reset_epoch" ] && reset_epoch=$(date -d "${reset_ts}" "+%s" 2>/dev/null)
+  reset_epoch=$(parse_iso_epoch "$reset_ts")
+  [ -z "$reset_epoch" ] && return
   [ -z "$reset_epoch" ] && return
   local now_epoch=$(date +%s)
   local diff=$(( reset_epoch - now_epoch ))
@@ -782,8 +794,7 @@ format_reset_abs() {
   local reset_ts="$1"
   [ -z "$reset_ts" ] && return
   local reset_epoch
-  reset_epoch=$(date -jf "%Y-%m-%dT%H:%M:%S" "${reset_ts%%.*}" "+%s" 2>/dev/null)
-  [ -z "$reset_epoch" ] && reset_epoch=$(date -d "${reset_ts}" "+%s" 2>/dev/null)
+  reset_epoch=$(parse_iso_epoch "$reset_ts")
   [ -z "$reset_epoch" ] && return
   local now_day=$(date +%Y%j)
   local reset_day

@@ -694,10 +694,8 @@ fetch_weather() {
   fi
 }
 
-# Usage — prefer stdin rate_limits from Claude Code, fallback to cached API
+# Usage (cached, Anthropic API — always fetch for resets_at timestamps)
 fetch_usage() {
-  # Only fetch from API if Claude Code didn't provide rate_limits in stdin
-  [ -n "$rl_5h_pct" ] && return
   local cache_age=999999
   [ -f "$USAGE_CACHE" ] && cache_age=$(($(date +%s) - $(stat -f %m "$USAGE_CACHE" 2>/dev/null || stat -c %Y "$USAGE_CACHE" 2>/dev/null || echo 0)))
   if [ "$cache_age" -gt "$USAGE_CACHE_TTL" ]; then
@@ -755,20 +753,26 @@ if [ -n "$temp_c" ]; then
   temp_f=$(echo "$temp_c" | awk '{printf "%.1f", $1 * 9/5 + 32}')
 fi
 
-# Parse usage — prefer stdin rate_limits, fallback to cached API
+# Parse usage — stdin for percentages (fresh), API cache for resets_at (timestamps)
 usage_5h="" usage_7d="" usage_5h_reset="" usage_7d_reset=""
+
+# Percentages: prefer stdin (real-time from Claude Code), fallback to API cache
 if [ -n "$rl_5h_pct" ]; then
-  # Claude Code provided rate_limits in stdin — use directly (always fresh)
   usage_5h="$rl_5h_pct"
   usage_7d="${rl_7d_pct:-0}"
-  usage_5h_reset="$rl_5h_reset"
-  usage_7d_reset="$rl_7d_reset"
-elif [ -f "$USAGE_CACHE" ]; then
-  usage_5h=$(jq -r '.five_hour.utilization // empty' "$USAGE_CACHE" 2>/dev/null)
-  usage_7d=$(jq -r '.seven_day.utilization // empty' "$USAGE_CACHE" 2>/dev/null)
+fi
+
+# Reset timestamps + fallback percentages from API cache
+if [ -f "$USAGE_CACHE" ]; then
+  [ -z "$usage_5h" ] && usage_5h=$(jq -r '.five_hour.utilization // empty' "$USAGE_CACHE" 2>/dev/null)
+  [ -z "$usage_7d" ] && usage_7d=$(jq -r '.seven_day.utilization // empty' "$USAGE_CACHE" 2>/dev/null)
   usage_5h_reset=$(jq -r '.five_hour.resets_at // empty' "$USAGE_CACHE" 2>/dev/null)
   usage_7d_reset=$(jq -r '.seven_day.resets_at // empty' "$USAGE_CACHE" 2>/dev/null)
 fi
+
+# Override reset timestamps from stdin if available
+[ -n "$rl_5h_reset" ] && usage_5h_reset="$rl_5h_reset"
+[ -n "$rl_7d_reset" ] && usage_7d_reset="$rl_7d_reset"
 
 # Parse ISO 8601 timestamp to epoch (handles UTC offset correctly)
 parse_iso_epoch() {

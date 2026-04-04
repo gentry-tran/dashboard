@@ -759,7 +759,7 @@ usage_5h="" usage_7d="" usage_5h_reset="" usage_7d_reset=""
 # Percentages: prefer stdin (real-time from Claude Code), fallback to API cache
 if [ -n "$rl_5h_pct" ]; then
   usage_5h="$rl_5h_pct"
-  usage_7d="${rl_7d_pct:-0}"
+  [ -n "$rl_7d_pct" ] && usage_7d="$rl_7d_pct"
 fi
 
 # Reset timestamps + fallback percentages from API cache

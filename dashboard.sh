@@ -145,6 +145,9 @@ load_theme() {
       T_RED='\033[1;38;2;0;255;0m'
       T_DIM='\033[38;2;0;40;0m'
       T_WEATHER='\033[38;2;0;140;0m'
+      T_BAR_SESSION='\033[1;38;2;0;255;0m'
+      T_BAR_WEEK='\033[38;2;0;180;0m'
+      T_BAR_CTX='\033[38;2;0;120;0m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="─"
@@ -172,6 +175,9 @@ load_theme() {
       T_RED='\033[38;2;220;50;47m'
       T_DIM='\033[38;2;7;54;66m'
       T_WEATHER='\033[38;2;42;161;152m'
+      T_BAR_SESSION='\033[38;2;220;50;47m'
+      T_BAR_WEEK='\033[38;2;181;137;0m'
+      T_BAR_CTX='\033[38;2;108;113;196m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="━"
@@ -199,6 +205,9 @@ load_theme() {
       T_RED='\033[38;2;191;97;106m'
       T_DIM='\033[38;2;46;52;64m'
       T_WEATHER='\033[38;2;163;190;140m'
+      T_BAR_SESSION='\033[38;2;191;97;106m'
+      T_BAR_WEEK='\033[38;2;235;203;139m'
+      T_BAR_CTX='\033[38;2;180;142;173m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="━"
@@ -232,6 +241,9 @@ load_theme() {
       T_RED='\033[1;38;2;255;30;30m'           # 2 neon red - high usage
       T_DIM='\033[38;2;40;0;55m'
       T_WEATHER='\033[1;38;2;255;30;30m'       # 2 neon red - weather
+      T_BAR_SESSION='\033[1;38;2;255;30;30m'
+      T_BAR_WEEK='\033[1;38;2;255;107;43m'
+      T_BAR_CTX='\033[1;38;2;150;0;255m'
       T_SEP="║"
       T_LINE_H="═"
       T_LINE_TOP="═"
@@ -259,6 +271,9 @@ load_theme() {
       T_RED='\033[31m'
       T_DIM='\033[90m'
       T_WEATHER='\033[90m'
+      T_BAR_SESSION='\033[31m'
+      T_BAR_WEEK='\033[33m'
+      T_BAR_CTX='\033[34m'
       T_SEP=" "
       T_LINE_H="·"
       T_LINE_TOP=""
@@ -286,6 +301,9 @@ load_theme() {
       T_RED='\033[38;2;180;40;40m'
       T_DIM='\033[38;2;26;26;46m'
       T_WEATHER='\033[38;2;100;100;140m'
+      T_BAR_SESSION='\033[38;2;180;40;40m'
+      T_BAR_WEEK='\033[38;2;245;197;24m'
+      T_BAR_CTX='\033[38;2;60;60;120m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="━"
@@ -313,6 +331,9 @@ load_theme() {
       T_RED='\033[38;2;220;20;60m'
       T_DIM='\033[38;2;25;25;40m'
       T_WEATHER='\033[38;2;0;150;190m'
+      T_BAR_SESSION='\033[38;2;220;20;60m'
+      T_BAR_WEEK='\033[38;2;255;215;0m'
+      T_BAR_CTX='\033[38;2;0;180;216m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="═"
@@ -340,6 +361,9 @@ load_theme() {
       T_RED='\033[38;2;255;50;50m'
       T_DIM='\033[38;2;40;25;5m'
       T_WEATHER='\033[38;2;200;150;50m'
+      T_BAR_SESSION='\033[38;2;255;50;50m'
+      T_BAR_WEEK='\033[38;2;255;107;0m'
+      T_BAR_CTX='\033[38;2;0;150;255m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="━"
@@ -367,6 +391,9 @@ load_theme() {
       T_RED='\033[1;38;2;204;0;0m'
       T_DIM='\033[38;2;15;30;0m'
       T_WEATHER='\033[38;2;100;140;60m'
+      T_BAR_SESSION='\033[1;38;2;204;0;0m'
+      T_BAR_WEEK='\033[38;2;255;140;0m'
+      T_BAR_CTX='\033[38;2;150;0;150m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="━"
@@ -394,6 +421,9 @@ load_theme() {
       T_RED='\033[38;2;255;60;80m'
       T_DIM='\033[38;2;15;20;35m'
       T_WEATHER='\033[38;2;0;150;130m'
+      T_BAR_SESSION='\033[38;2;255;60;80m'
+      T_BAR_WEEK='\033[38;2;0;200;170m'
+      T_BAR_CTX='\033[38;2;80;100;160m'
       T_SEP="▐"
       T_LINE_H="▌"
       T_LINE_TOP="▐"
@@ -421,6 +451,9 @@ load_theme() {
       T_RED='\033[1;38;2;230;57;70m'
       T_DIM='\033[38;2;20;35;60m'
       T_WEATHER='\033[38;2;100;130;170m'
+      T_BAR_SESSION='\033[1;38;2;230;57;70m'
+      T_BAR_WEEK='\033[38;2;230;200;100m'
+      T_BAR_CTX='\033[38;2;100;130;180m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="═"
@@ -448,6 +481,9 @@ load_theme() {
       T_RED='\033[1;38;2;225;29;72m'
       T_DIM='\033[38;2;25;25;35m'
       T_WEATHER='\033[38;2;100;100;150m'
+      T_BAR_SESSION='\033[1;38;2;225;29;72m'
+      T_BAR_WEEK='\033[38;2;255;200;50m'
+      T_BAR_CTX='\033[38;2;37;99;235m'
       T_SEP="│"
       T_LINE_H="╌"
       T_LINE_TOP="━"
@@ -475,6 +511,9 @@ load_theme() {
       T_RED='\033[38;2;255;105;180m'
       T_DIM='\033[38;2;30;30;35m'
       T_WEATHER='\033[38;2;0;120;120m'
+      T_BAR_SESSION='\033[38;2;255;69;0m'
+      T_BAR_WEEK='\033[38;2;255;105;180m'
+      T_BAR_CTX='\033[38;2;0;139;139m'
       T_SEP="┊"
       T_LINE_H="┄"
       T_LINE_TOP="┄"
@@ -502,6 +541,9 @@ load_theme() {
       T_RED='\033[38;2;220;50;50m'
       T_DIM='\033[38;2;0;40;55m'
       T_WEATHER='\033[38;2;100;180;220m'
+      T_BAR_SESSION='\033[38;2;220;50;50m'
+      T_BAR_WEEK='\033[38;2;255;215;0m'
+      T_BAR_CTX='\033[38;2;0;105;148m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="━"
@@ -529,6 +571,9 @@ load_theme() {
       T_RED='\033[38;2;180;100;80m'
       T_DIM='\033[38;2;55;70;45m'
       T_WEATHER='\033[38;2;143;188;143m'
+      T_BAR_SESSION='\033[38;2;180;100;80m'
+      T_BAR_WEEK='\033[38;2;218;190;130m'
+      T_BAR_CTX='\033[38;2;74;93;59m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="─"
@@ -556,6 +601,9 @@ load_theme() {
       T_RED='\033[1;38;2;255;99;71m'
       T_DIM='\033[38;2;15;45;15m'
       T_WEATHER='\033[1;38;2;0;168;107m'
+      T_BAR_SESSION='\033[1;38;2;255;99;71m'
+      T_BAR_WEEK='\033[1;38;2;255;215;0m'
+      T_BAR_CTX='\033[1;38;2;0;168;107m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="━"
@@ -583,6 +631,9 @@ load_theme() {
       T_RED='\033[1;38;2;255;105;180m'
       T_DIM='\033[38;2;40;65;30m'
       T_WEATHER='\033[1;38;2;135;206;235m'
+      T_BAR_SESSION='\033[1;38;2;255;105;180m'
+      T_BAR_WEEK='\033[1;38;2;255;224;102m'
+      T_BAR_CTX='\033[1;38;2;135;206;235m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="─"
@@ -610,6 +661,9 @@ load_theme() {
       T_RED='\033[1;38;2;205;133;63m'
       T_DIM='\033[38;2;35;45;30m'
       T_WEATHER='\033[1;38;2;176;224;230m'
+      T_BAR_SESSION='\033[1;38;2;205;133;63m'
+      T_BAR_WEEK='\033[1;38;2;218;165;32m'
+      T_BAR_CTX='\033[1;38;2;176;224;230m'
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="─"
@@ -637,6 +691,9 @@ load_theme() {
       T_RED='\033[1;38;2;255;99;71m'
       T_DIM='\033[38;2;60;35;15m'
       T_WEATHER='\033[1;38;2;255;215;0m'
+      T_BAR_SESSION='\033[1;38;2;255;99;71m'     # tomato red
+      T_BAR_WEEK='\033[1;38;2;255;165;0m'        # carrot orange
+      T_BAR_CTX='\033[1;38;2;148;103;189m'       # eggplant purple
       T_SEP="│"
       T_LINE_H="─"
       T_LINE_TOP="━"
@@ -959,6 +1016,7 @@ u7d_color=$(get_level_color "${usage_7d%%.*}")
 build_bar() {
   local pct="${1:-0}"
   local width="${2:-36}"
+  local color="${3:-$ctx_color}"
   local filled=$((pct * width / 100))
   [ "$filled" -gt "$width" ] && filled=$width
   local empty=$((width - filled))
@@ -966,7 +1024,7 @@ build_bar() {
   for ((i=0; i<filled; i++)); do bar+="$T_BAR_FILL"; done
   local bar_empty=""
   for ((i=0; i<empty; i++)); do bar_empty+="$T_BAR_EMPTY"; done
-  printf "${ctx_color}${bar}${T_DIM}${bar_empty}${RESET}"
+  printf "${color}${bar}${T_DIM}${bar_empty}${RESET}"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1035,36 +1093,43 @@ else
   make_line "$T_LINE_H"
 fi
 
-# Line 4: Context
-[ -n "$T_ICON_CTX" ] && printf "${T_ACCENT4}${T_ICON_CTX}${RESET} "
-printf "${T_ACCENT4}Context:${RESET} "
-build_bar "$context_pct" 30
-printf " ${ctx_color}${context_pct}%%${RESET} ${T_LABEL}(${context_k}k/${max_k}k)${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} "
-[ -n "$T_ICON_TIME" ] && printf "${T_ACCENT3}${T_ICON_TIME}${RESET} "
-printf "${T_VALUE}${time_dur}${RESET}\n"
-
-# Line 5: Usage
+# Line 4: Usage (Session + Week with progress bars)
 usage_5h_int="${usage_5h%%.*}"
 usage_7d_int="${usage_7d%%.*}"
 usage_5h_int="${usage_5h_int:-0}"
 usage_7d_int="${usage_7d_int:-0}"
 
-# Colors: orange icon+label, cyan sub-labels, green values
 [ -n "$T_ICON_USE" ] && printf "${T_ACCENT2}${T_ICON_USE}${RESET} "
-printf "${T_ACCENT2}Usage:${RESET}   ${T_ACCENT3}Session:${RESET} ${u5h_color}${usage_5h_int}%%${RESET}"
+printf "${T_ACCENT3}Session:${RESET} "
+build_bar "$usage_5h_int" 30 "$T_BAR_SESSION"
+printf " ${T_BAR_SESSION}${usage_5h_int}%%${RESET}"
 if [ -n "$reset_5h" ]; then
   reset_5h_detail="${reset_5h}"
   [ -n "$reset_5h_abs" ] && reset_5h_detail="${reset_5h}, ${reset_5h_abs}"
   printf " ${T_ACCENT4}(${reset_5h_detail})${RESET}"
 fi
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Week:${RESET} ${u7d_color}${usage_7d_int}%%${RESET}"
+printf "\n"
+
+# Line 5: Week usage
+[ -n "$T_ICON_USE" ] && printf "${T_ACCENT2}${T_ICON_USE}${RESET} "
+printf "${T_ACCENT3}Week:${RESET}    "
+build_bar "$usage_7d_int" 30 "$T_BAR_WEEK"
+printf " ${T_BAR_WEEK}${usage_7d_int}%%${RESET}"
 if [ -n "$reset_7d" ]; then
   reset_7d_detail="${reset_7d}"
   [ -n "$reset_7d_abs" ] && reset_7d_detail="${reset_7d}, ${reset_7d_abs}"
   printf " ${T_ACCENT4}(${reset_7d_detail})${RESET}"
 fi
 printf "\n"
+
+# Line 6: Context
+[ -n "$T_ICON_CTX" ] && printf "${T_ACCENT4}${T_ICON_CTX}${RESET} "
+printf "${T_ACCENT4}Context:${RESET} "
+build_bar "$context_pct" 30 "$T_BAR_CTX"
+printf " ${T_BAR_CTX}${context_pct}%%${RESET} ${T_LABEL}(${context_k}k/${max_k}k)${RESET}"
+printf " ${T_BORDER}${T_SEP}${RESET} "
+[ -n "$T_ICON_TIME" ] && printf "${T_ACCENT3}${T_ICON_TIME}${RESET} "
+printf "${T_VALUE}${time_dur}${RESET}\n"
 
 # Line 6: Session — duration, turns, cost, agents
 # Colors: cyan icon+label, pink sub-labels, green values

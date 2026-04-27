@@ -32,10 +32,12 @@ SETTINGS_FILE="$CONFIG_DIR/settings.json"
 USAGE_CACHE="${DASHBOARD_CACHE_DIR:-$CONFIG_DIR/dashboard-cache}/usage.json"
 LOCATION_CACHE="${DASHBOARD_CACHE_DIR:-$CONFIG_DIR/dashboard-cache}/location.json"
 WEATHER_CACHE="${DASHBOARD_CACHE_DIR:-$CONFIG_DIR/dashboard-cache}/weather.json"
+ACCOUNT_CACHE="${DASHBOARD_CACHE_DIR:-$CONFIG_DIR/dashboard-cache}/account.json"
 
-USAGE_CACHE_TTL=${DASHBOARD_USAGE_TTL:-120}       # 2 minutes
+USAGE_CACHE_TTL=${DASHBOARD_USAGE_TTL:-120}        # 2 minutes
 LOCATION_CACHE_TTL=${DASHBOARD_LOCATION_TTL:-3600} # 1 hour
 WEATHER_CACHE_TTL=${DASHBOARD_WEATHER_TTL:-900}    # 15 minutes
+ACCOUNT_CACHE_TTL=${DASHBOARD_ACCOUNT_TTL:-60}     # 60s — sync with dashboard refresh
 
 # Context baseline: preloaded tokens not visible to hooks
 CONTEXT_BASELINE=${DASHBOARD_CONTEXT_BASELINE:-22600}
@@ -770,10 +772,23 @@ fetch_usage() {
   fi
 }
 
-# Fetch all data in background
+# Account (cached, claude auth status — keychain read)
+fetch_account() {
+  local cache_age=999999
+  [ -f "$ACCOUNT_CACHE" ] && cache_age=$(($(date +%s) - $(stat -f %m "$ACCOUNT_CACHE" 2>/dev/null || stat -c %Y "$ACCOUNT_CACHE" 2>/dev/null || echo 0)))
+  if [ "$cache_age" -gt "$ACCOUNT_CACHE_TTL" ]; then
+    local account_data=$(claude auth status 2>/dev/null)
+    if [ -n "$account_data" ] && echo "$account_data" | jq -e '.email' >/dev/null 2>&1; then
+      echo "$account_data" > "$ACCOUNT_CACHE"
+    fi
+  fi
+}
+
+# Fetch all data in background — synced via wait
 fetch_location &
 fetch_weather &
 fetch_usage &
+fetch_account &
 wait 2>/dev/null
 
 # Parse location
@@ -782,6 +797,13 @@ if [ -f "$LOCATION_CACHE" ]; then
   city=$(jq -r '.city // empty' "$LOCATION_CACHE" 2>/dev/null)
   region=$(jq -r '.region // empty' "$LOCATION_CACHE" 2>/dev/null)
   timezone_name=$(jq -r '.timezone // empty' "$LOCATION_CACHE" 2>/dev/null)
+fi
+
+# Parse account
+account_email="" account_sub=""
+if [ -f "$ACCOUNT_CACHE" ]; then
+  account_email=$(jq -r '.email // empty' "$ACCOUNT_CACHE" 2>/dev/null)
+  account_sub=$(jq -r '.subscriptionType // empty' "$ACCOUNT_CACHE" 2>/dev/null)
 fi
 
 # Parse weather
@@ -1081,6 +1103,13 @@ printf "${T_ACCENT2}Claude Code v${cc_version}${RESET} ${T_BORDER}${T_SEP}${RESE
 printf "${T_ACCENT1}Model:${RESET} ${T_VALUE}${model_name}${RESET} ${T_BORDER}${T_SEP}${RESET} "
 printf "${T_ACCENT1}Skills:${RESET} ${T_VALUE}${skills_count}${RESET} ${T_BORDER}${T_SEP}${RESET} "
 printf "${T_ACCENT1}MCP:${RESET} ${T_VALUE}${mcp_count}${RESET}\n"
+
+# Line 3b: Account
+if [ -n "$account_email" ]; then
+  printf "${T_ACCENT1}Account:${RESET} ${T_VALUE}${account_email}${RESET}"
+  [ -n "$account_sub" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Plan:${RESET} ${T_VALUE}${account_sub}${RESET}"
+  printf "\n"
+fi
 
 # Separator
 if [ "$THEME" = "cyberpunk" ]; then

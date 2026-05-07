@@ -141,13 +141,13 @@ export DASHBOARD_THEME=harvest
 _Ported from [basicScandal/claude-skins](https://github.com/basicScandal/claude-skins) (CC BY-SA 4.0)._
 
 #### Nebula
-Offensive-security scanner aesthetic — purple-to-orange gradient, pentest vibes.
+![Nebula](screenshots/nebula.png)
 
 #### Mythos
-AGI awakening — Greek-mythology meets artificial intelligence, blue and divine gold.
+![Mythos](screenshots/mythos.png)
 
 #### Netrunner
-Cyberpunk neural-interface hacker — electric cyan ICE on black.
+![Netrunner](screenshots/netrunner.png)
 
 ## Theme List
 

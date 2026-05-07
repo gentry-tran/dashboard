@@ -4,12 +4,12 @@
 
 **A beautiful, themeable status line for [Claude Code](https://docs.anthropic.com/en/docs/claude-code)**
 
-19 themes including pop culture, anime, nature, and classic developer aesthetics.
+22 themes including pop culture, anime, nature, sci-fi, and classic developer aesthetics.
 
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat&logo=gnubash&logoColor=white)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-D4A574?style=flat&logo=anthropic&logoColor=white)
 ![License](https://img.shields.io/github/license/gentry-tran/dashboard?style=flat&color=60A5FA)
-![Themes](https://img.shields.io/badge/Themes-19-8B5CF6?style=flat)
+![Themes](https://img.shields.io/badge/Themes-22-8B5CF6?style=flat)
 
 </div>
 
@@ -136,6 +136,19 @@ export DASHBOARD_THEME=harvest
 #### Ghibli
 ![Ghibli](screenshots/ghibli.png)
 
+### Sci-Fi Themes
+
+_Ported from [basicScandal/claude-skins](https://github.com/basicScandal/claude-skins) (CC BY-SA 4.0)._
+
+#### Nebula
+Offensive-security scanner aesthetic — purple-to-orange gradient, pentest vibes.
+
+#### Mythos
+AGI awakening — Greek-mythology meets artificial intelligence, blue and divine gold.
+
+#### Netrunner
+Cyberpunk neural-interface hacker — electric cyan ICE on black.
+
 ## Theme List
 
 | Theme | Header Name | Style |
@@ -159,6 +172,9 @@ export DASHBOARD_THEME=harvest
 | `garden` | GARDEN | Grass green, flower pink, sunny yellow, sky blue |
 | `terrarium` | TERRARIUM | Sage, moss, warm amber, glass blue |
 | `harvest` | HARVEST | Tomato red, carrot orange, lettuce green, eggplant |
+| `nebula` | NEBULA | Purple-to-orange offensive-security gradient |
+| `mythos` | MYTHOS | Midnight blue + divine gold, AGI/Greek mythology |
+| `netrunner` | NETRUNNER | Electric cyan ICE on black, neon magenta accent |
 
 ## Configuration
 

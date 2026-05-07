@@ -14,7 +14,8 @@
 #  Available themes:
 #    terminal-green, solarized, nord, cyberpunk, minimal,
 #    batman, iron-man, dbz, evangelion, ghost-in-shell, akira,
-#    spider-verse, blade-runner, one-piece, ghibli
+#    spider-verse, blade-runner, one-piece, ghibli,
+#    nebula, mythos, netrunner
 # ============================================================================
 
 set -o pipefail
@@ -707,8 +708,104 @@ load_theme() {
       T_ICON_TIME="🍊"
       ;;
 
+    nebula)
+      # Offensive security scanner — purple-to-orange gradient, pentest aesthetic.
+      # Ported from claude-skins (basicScandal/claude-skins).
+      T_HEADER="NEBULA"
+      T_BORDER='\033[38;2;60;0;80m'
+      T_TITLE='\033[1;38;2;255;107;53m'        # neon orange
+      T_LABEL='\033[1;38;2;106;13;173m'        # deep purple
+      T_VALUE='\033[1;38;2;224;214;240m'       # off-white
+      T_HIGHLIGHT='\033[1;38;2;255;107;53m'    # neon orange
+      T_ACCENT1='\033[1;38;2;138;43;226m'      # blue-violet
+      T_ACCENT2='\033[1;38;2;179;136;255m'    # lavender
+      T_ACCENT3='\033[1;38;2;255;107;53m'      # orange
+      T_ACCENT4='\033[1;38;2;106;13;173m'      # purple
+      T_GREEN='\033[1;38;2;57;255;20m'         # acid green
+      T_YELLOW='\033[1;38;2;255;107;53m'       # orange (warning)
+      T_RED='\033[1;38;2;255;61;61m'           # alert red
+      T_DIM='\033[38;2;26;8;48m'
+      T_WEATHER='\033[1;38;2;179;136;255m'
+      T_BAR_SESSION='\033[1;38;2;255;107;53m'  # orange
+      T_BAR_WEEK='\033[1;38;2;138;43;226m'     # violet
+      T_BAR_CTX='\033[1;38;2;106;13;173m'      # purple
+      T_SEP="│"
+      T_LINE_H="─"
+      T_LINE_TOP="━"
+      T_BAR_FILL="█"
+      T_BAR_EMPTY="░"
+      T_ICON_CTX="✦"
+      T_ICON_USE="◆"
+      T_ICON_SES="◈"
+      T_ICON_TIME="⏱"
+      ;;
+
+    mythos)
+      # AGI awakening — Greek-mythology meets artificial intelligence, blue & gold divine palette.
+      # Ported from claude-skins (basicScandal/claude-skins).
+      T_HEADER="MYTHOS"
+      T_BORDER='\033[38;2;26;35;126m'           # midnight blue
+      T_TITLE='\033[1;38;2;255;215;0m'          # divine gold
+      T_LABEL='\033[38;2;92;107;192m'           # indigo
+      T_VALUE='\033[1;38;2;232;234;246m'        # ivory
+      T_HIGHLIGHT='\033[1;38;2;255;215;0m'      # gold
+      T_ACCENT1='\033[1;38;2;66;165;245m'       # azure
+      T_ACCENT2='\033[1;38;2;255;215;0m'        # gold
+      T_ACCENT3='\033[38;2;206;147;216m'        # muted lilac
+      T_ACCENT4='\033[1;38;2;77;208;225m'       # cyan
+      T_GREEN='\033[1;38;2;102;187;106m'
+      T_YELLOW='\033[1;38;2;255;215;0m'
+      T_RED='\033[1;38;2;239;83;80m'
+      T_DIM='\033[38;2;13;27;61m'
+      T_WEATHER='\033[1;38;2;77;208;225m'
+      T_BAR_SESSION='\033[1;38;2;255;215;0m'    # gold
+      T_BAR_WEEK='\033[1;38;2;66;165;245m'      # azure
+      T_BAR_CTX='\033[1;38;2;206;147;216m'      # lilac
+      T_SEP="│"
+      T_LINE_H="─"
+      T_LINE_TOP="━"
+      T_BAR_FILL="█"
+      T_BAR_EMPTY="░"
+      T_ICON_CTX="◎"
+      T_ICON_USE="Θ"
+      T_ICON_SES="✧"
+      T_ICON_TIME="⏱"
+      ;;
+
+    netrunner)
+      # Cyberpunk neural-interface hacker — cyan ICE on black, terse hacker aesthetic.
+      # Ported from claude-skins (basicScandal/claude-skins).
+      T_HEADER="NETRUNNER"
+      T_BORDER='\033[38;2;0;77;64m'             # deep teal
+      T_TITLE='\033[1;38;2;0;229;255m'          # electric cyan
+      T_LABEL='\033[1;38;2;0;188;212m'          # cyan
+      T_VALUE='\033[1;38;2;128;203;196m'        # mint
+      T_HIGHLIGHT='\033[1;38;2;0;229;255m'      # electric cyan
+      T_ACCENT1='\033[1;38;2;224;64;251m'       # neon magenta
+      T_ACCENT2='\033[1;38;2;243;230;0m'        # neon yellow
+      T_ACCENT3='\033[1;38;2;0;229;255m'        # electric cyan
+      T_ACCENT4='\033[1;38;2;105;240;174m'      # acid mint
+      T_GREEN='\033[1;38;2;105;240;174m'
+      T_YELLOW='\033[1;38;2;243;230;0m'
+      T_RED='\033[1;38;2;255;23;68m'            # ICE-break red
+      T_DIM='\033[38;2;0;40;40m'
+      T_WEATHER='\033[1;38;2;0;229;255m'
+      T_BAR_SESSION='\033[1;38;2;255;23;68m'    # red
+      T_BAR_WEEK='\033[1;38;2;224;64;251m'      # magenta
+      T_BAR_CTX='\033[1;38;2;0;188;212m'        # cyan
+      T_SEP="║"
+      T_LINE_H="═"
+      T_LINE_TOP="═"
+      T_BAR_FILL="█"
+      T_BAR_EMPTY="░"
+      T_ICON_CTX="◎"
+      T_ICON_USE="⟐"
+      T_ICON_SES="◈"
+      T_ICON_TIME="⏱"
+      ;;
+
     *)
-      echo "Unknown theme: $theme. Available: terminal-green, solarized, nord, cyberpunk, minimal, batman, iron-man, dbz, evangelion, ghost-in-shell, akira, spider-verse, blade-runner, one-piece, ghibli, rainforest, garden, terrarium, harvest" >&2
+      echo "Unknown theme: $theme. Available: terminal-green, solarized, nord, cyberpunk, minimal, batman, iron-man, dbz, evangelion, ghost-in-shell, akira, spider-verse, blade-runner, one-piece, ghibli, rainforest, garden, terrarium, harvest, nebula, mythos, netrunner" >&2
       THEME="harvest"
       load_theme "harvest"
       return

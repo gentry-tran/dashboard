@@ -870,12 +870,29 @@ fetch_usage() {
 }
 
 # Account (cached, claude auth status — keychain read)
+# `claude` is typically a shell alias (~/.zshrc) that isn't visible inside
+# non-interactive scripts. Resolve a real binary path before calling.
+_resolve_claude_bin() {
+  if [ -n "${CLAUDE_BIN:-}" ] && [ -x "$CLAUDE_BIN" ]; then
+    echo "$CLAUDE_BIN"
+  elif command -v claude >/dev/null 2>&1; then
+    command -v claude
+  elif [ -x "$HOME/.claude/local/claude" ]; then
+    echo "$HOME/.claude/local/claude"
+  fi
+}
+
 fetch_account() {
   local cache_age=999999
   [ -f "$ACCOUNT_CACHE" ] && cache_age=$(($(date +%s) - $(stat -f %m "$ACCOUNT_CACHE" 2>/dev/null || stat -c %Y "$ACCOUNT_CACHE" 2>/dev/null || echo 0)))
   if [ "$cache_age" -gt "$ACCOUNT_CACHE_TTL" ]; then
-    local account_data=$(claude auth status 2>/dev/null)
+    local claude_bin
+    claude_bin=$(_resolve_claude_bin)
+    [ -z "$claude_bin" ] && return 0
+    local account_data
+    account_data=$("$claude_bin" auth status 2>/dev/null)
     if [ -n "$account_data" ] && echo "$account_data" | jq -e '.email' >/dev/null 2>&1; then
+      mkdir -p "$(dirname "$ACCOUNT_CACHE")"
       echo "$account_data" > "$ACCOUNT_CACHE"
     fi
   fi

@@ -41,7 +41,9 @@ WEATHER_CACHE_TTL=${DASHBOARD_WEATHER_TTL:-900}    # 15 minutes
 ACCOUNT_CACHE_TTL=${DASHBOARD_ACCOUNT_TTL:-60}     # 60s — sync with dashboard refresh
 
 # Context baseline: preloaded tokens not visible to hooks
-CONTEXT_BASELINE=${DASHBOARD_CONTEXT_BASELINE:-22600}
+# API usage fields (cache_read + cache_creation + input_tokens) already
+# include the full system prompt, so no baseline adjustment is needed.
+CONTEXT_BASELINE=${DASHBOARD_CONTEXT_BASELINE:-0}
 
 # Theme (env var > CLI arg > config file > default)
 THEME="${DASHBOARD_THEME:-harvest}"
@@ -1095,7 +1097,9 @@ else
 fi
 
 # Context calculations — prefer Claude Code's used_percentage, fallback to manual
-content_tokens=$((cache_read + input_tokens + cache_creation + output_tokens))
+# Only count input tokens (cache_read + cache_creation + input_tokens).
+# Output tokens are the model's response, not input context consumed.
+content_tokens=$((cache_read + input_tokens + cache_creation))
 context_used=$((content_tokens + CONTEXT_BASELINE))
 max_k=$((context_max / 1000))
 context_k=$((context_used / 1000))

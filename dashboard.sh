@@ -1198,58 +1198,35 @@ else
   printf "\n"
 fi
 
-# Line 3: Claude Code version + Model + Skills + MCP
+# Line 3: Claude Code version + Model + Skills + MCP + Account + Plan (single line)
 # Colors: orange version, pink labels, green values
 printf "${T_ACCENT2}Claude Code v${cc_version}${RESET} ${T_BORDER}${T_SEP}${RESET} "
 printf "${T_ACCENT1}Model:${RESET} ${T_VALUE}${model_name}${RESET} ${T_BORDER}${T_SEP}${RESET} "
 printf "${T_ACCENT1}Skills:${RESET} ${T_VALUE}${skills_count}${RESET} ${T_BORDER}${T_SEP}${RESET} "
-printf "${T_ACCENT1}MCP:${RESET} ${T_VALUE}${mcp_count}${RESET}\n"
-
-# Line 3b: Account
+printf "${T_ACCENT1}MCP:${RESET} ${T_VALUE}${mcp_count}${RESET}"
 if [ -n "$account_email" ]; then
-  printf "${T_ACCENT1}Account:${RESET} ${T_VALUE}${account_email}${RESET}"
-  [ -n "$account_sub" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Plan:${RESET} ${T_VALUE}${account_sub}${RESET}"
-  printf "\n"
+  account_short="${account_email%@*}"
+  printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}${account_short}${RESET}"
+  [ -n "$account_sub" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_VALUE}${account_sub}${RESET}"
 fi
+printf "\n"
 
-# Separator
-if [ "$THEME" = "cyberpunk" ]; then
-  printf "${T_BORDER}╠"
-  for ((i=0; i<73; i++)); do printf "═"; done
-  printf "╣${RESET}\n"
-elif [ "$THEME" = "minimal" ]; then
-  make_line "$T_LINE_H"
-else
-  make_line "$T_LINE_H"
-fi
-
-# Line 4: Usage (Session + Week with progress bars)
+# Line 4: Usage — Session + Week side-by-side (compact bars)
 usage_5h_int="${usage_5h%%.*}"
 usage_7d_int="${usage_7d%%.*}"
 usage_5h_int="${usage_5h_int:-0}"
 usage_7d_int="${usage_7d_int:-0}"
 
 [ -n "$T_ICON_USE" ] && printf "${T_ACCENT2}${T_ICON_USE}${RESET} "
-printf "${T_ACCENT3}Session:${RESET} "
-build_bar "$usage_5h_int" 30 "$T_BAR_SESSION"
+printf "${T_ACCENT3}S:${RESET} "
+build_bar "$usage_5h_int" 12 "$T_BAR_SESSION"
 printf " ${T_BAR_SESSION}${usage_5h_int}%%${RESET}"
-if [ -n "$reset_5h" ]; then
-  reset_5h_detail="${reset_5h}"
-  [ -n "$reset_5h_abs" ] && reset_5h_detail="${reset_5h}, ${reset_5h_abs}"
-  printf " ${T_ACCENT4}(${reset_5h_detail})${RESET}"
-fi
-printf "\n"
-
-# Line 5: Week usage
-[ -n "$T_ICON_USE" ] && printf "${T_ACCENT2}${T_ICON_USE}${RESET} "
-printf "${T_ACCENT3}Week:${RESET}    "
-build_bar "$usage_7d_int" 30 "$T_BAR_WEEK"
+[ -n "$reset_5h" ] && printf " ${T_ACCENT4}(${reset_5h})${RESET}"
+printf "  ${T_BORDER}${T_SEP}${RESET}  "
+printf "${T_ACCENT3}W:${RESET} "
+build_bar "$usage_7d_int" 12 "$T_BAR_WEEK"
 printf " ${T_BAR_WEEK}${usage_7d_int}%%${RESET}"
-if [ -n "$reset_7d" ]; then
-  reset_7d_detail="${reset_7d}"
-  [ -n "$reset_7d_abs" ] && reset_7d_detail="${reset_7d}, ${reset_7d_abs}"
-  printf " ${T_ACCENT4}(${reset_7d_detail})${RESET}"
-fi
+[ -n "$reset_7d" ] && printf " ${T_ACCENT4}(${reset_7d})${RESET}"
 printf "\n"
 
 # Line 6: Context
@@ -1261,27 +1238,21 @@ printf " ${T_BORDER}${T_SEP}${RESET} "
 [ -n "$T_ICON_TIME" ] && printf "${T_ACCENT3}${T_ICON_TIME}${RESET} "
 printf "${T_VALUE}${time_dur}${RESET}\n"
 
-# Line 6: Session — duration, turns, cost, agents
-# Colors: cyan icon+label, pink sub-labels, green values
-[ -n "$T_ICON_SES" ] && printf "${T_ACCENT3}${T_ICON_SES}${RESET} "
-printf "${T_ACCENT3}Session:${RESET} ${T_VALUE}${time_dur}${RESET}"
-[ "$turn_count" != "?" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Turns:${RESET} ${T_VALUE}${turn_count}${RESET}"
-[ -n "$cost_display" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Cost:${RESET} ${T_VALUE}${cost_display}${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Agents:${RESET} "
-if [ "$agent_count" -gt 0 ] 2>/dev/null; then
-  printf "${T_GREEN}${agent_count}${RESET} ${T_VALUE}${agent_names}${RESET}"
-else
-  printf "${T_DIM}None${RESET}"
-fi
-printf "\n"
-
-# Line 7: System — CPU, memory, disk
+# Line 6: Session-time + Cost + Agents + System (CPU/Mem/Disk) on single line
 sys_color_cpu=$(get_level_color "$(echo "$cpu_load" | awk '{printf "%.0f", $1 * 25}')" 2>/dev/null)
 sys_color_mem=$(get_level_color "$mem_used_pct")
 sys_color_disk=$(get_level_color "$disk_usage")
 
-# Colors: orange System: label, cyan sub-labels, red values
-printf "${T_ACCENT2}System:${RESET}  "
+[ -n "$T_ICON_SES" ] && printf "${T_ACCENT3}${T_ICON_SES}${RESET} "
+printf "${T_VALUE}${time_dur}${RESET}"
+[ -n "$cost_display" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_VALUE}${cost_display}${RESET}"
+printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}A:${RESET} "
+if [ "$agent_count" -gt 0 ] 2>/dev/null; then
+  printf "${T_GREEN}${agent_count}${RESET}"
+else
+  printf "${T_DIM}0${RESET}"
+fi
+printf " ${T_BORDER}${T_SEP}${RESET} "
 printf "${T_ACCENT3}CPU:${RESET} ${sys_color_cpu:-$T_VALUE}%s${RESET}" "$cpu_load"
 printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Mem:${RESET} ${sys_color_mem:-$T_VALUE}%s${RESET}" "$mem_display"
 printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Disk:${RESET} ${sys_color_disk:-$T_VALUE}%s${RESET}" "$disk_display"

@@ -891,12 +891,41 @@ fetch_usage &
 fetch_account &
 wait 2>/dev/null
 
+# Map a full US state/territory name to its 2-letter postal abbreviation.
+# Echoes the input unchanged if not found.
+state_abbrev() {
+  case "$1" in
+    Alabama) echo AL;; Alaska) echo AK;; Arizona) echo AZ;; Arkansas) echo AR;;
+    California) echo CA;; Colorado) echo CO;; Connecticut) echo CT;; Delaware) echo DE;;
+    Florida) echo FL;; Georgia) echo GA;; Hawaii) echo HI;; Idaho) echo ID;;
+    Illinois) echo IL;; Indiana) echo IN;; Iowa) echo IA;; Kansas) echo KS;;
+    Kentucky) echo KY;; Louisiana) echo LA;; Maine) echo ME;; Maryland) echo MD;;
+    Massachusetts) echo MA;; Michigan) echo MI;; Minnesota) echo MN;; Mississippi) echo MS;;
+    Missouri) echo MO;; Montana) echo MT;; Nebraska) echo NE;; Nevada) echo NV;;
+    "New Hampshire") echo NH;; "New Jersey") echo NJ;; "New Mexico") echo NM;; "New York") echo NY;;
+    "North Carolina") echo NC;; "North Dakota") echo ND;; Ohio) echo OH;; Oklahoma) echo OK;;
+    Oregon) echo OR;; Pennsylvania) echo PA;; "Rhode Island") echo RI;; "South Carolina") echo SC;;
+    "South Dakota") echo SD;; Tennessee) echo TN;; Texas) echo TX;; Utah) echo UT;;
+    Vermont) echo VT;; Virginia) echo VA;; Washington) echo WA;; "West Virginia") echo WV;;
+    Wisconsin) echo WI;; Wyoming) echo WY;; "District of Columbia") echo DC;;
+    "Puerto Rico") echo PR;;
+    *) echo "$1";;
+  esac
+}
+
 # Parse location
-city="" region="" timezone_name=""
+city="" region="" country="" timezone_name=""
 if [ -f "$LOCATION_CACHE" ]; then
   city=$(jq -r '.city // empty' "$LOCATION_CACHE" 2>/dev/null)
   region=$(jq -r '.region // empty' "$LOCATION_CACHE" 2>/dev/null)
+  country=$(jq -r '.country // empty' "$LOCATION_CACHE" 2>/dev/null)
   timezone_name=$(jq -r '.timezone // empty' "$LOCATION_CACHE" 2>/dev/null)
+fi
+# Region display: US -> state abbrev (IL); non-US -> country code (abbrev).
+if [ "$country" = "US" ] || [ -z "$country" ]; then
+  region_disp=$(state_abbrev "$region")
+else
+  region_disp="$country"
 fi
 
 # Parse account
@@ -928,8 +957,16 @@ if [ -f "$WEATHER_CACHE" ]; then
     *) weather_desc="" ;;
   esac
 fi
+# Temperature unit: default Celsius; override per-machine via DASHBOARD_TEMP_UNIT=F
+TEMP_UNIT="${DASHBOARD_TEMP_UNIT:-C}"
+temp_disp=""
 if [ -n "$temp_c" ]; then
   temp_f=$(echo "$temp_c" | awk '{printf "%.1f", $1 * 9/5 + 32}')
+  if [ "$TEMP_UNIT" = "F" ] || [ "$TEMP_UNIT" = "f" ]; then
+    temp_disp="${temp_f}°F"
+  else
+    temp_disp="${temp_c}°C"
+  fi
 fi
 
 # Parse usage — stdin for percentages (fresh), API cache for resets_at (timestamps)
@@ -1215,8 +1252,8 @@ render_body() {
     printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}${account_short}${RESET}"
     [ -n "$account_sub" ] && printf " ${T_VALUE}(${account_sub})${RESET}"
   fi
-  [ -n "$city" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region}${RESET}"
-  [ -n "$temp_c" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_WEATHER}${temp_c}°C | ${temp_f}°F ${weather_desc}${RESET}"
+  [ -n "$city" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region_disp}${RESET}"
+  [ -n "$temp_disp" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_WEATHER}${temp_disp} ${weather_desc}${RESET}"
   printf "\n"
 
   # Lines 2-4: Session / Week / Context bars (one per line)

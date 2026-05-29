@@ -101,6 +101,7 @@ input=$(cat)
 
 eval "$(echo "$input" | jq -r '
   "current_dir=" + (.workspace.current_dir // .cwd // "" | @sh) + "\n" +
+  "transcript_path=" + (.transcript_path // "" | @sh) + "\n" +
   "model_name=" + (.model.display_name // "unknown" | @sh) + "\n" +
   "cc_version=" + (.version // "" | @sh) + "\n" +
   "duration_ms=" + (.cost.total_duration_ms // 0 | tostring) + "\n" +
@@ -1044,9 +1045,9 @@ if command -v vm_stat >/dev/null 2>&1; then
   total_mem_gb=$(awk "BEGIN {printf \"%.0f\", $total_mem_mb / 1024}")
   if [ "$free_mem_mb" -ge 1024 ]; then
     free_mem_gb=$(awk "BEGIN {printf \"%.1f\", $free_mem_mb / 1024}")
-    mem_display="${free_mem_gb}/${total_mem_gb}GB free"
+    mem_display="${free_mem_gb}GB free / ${total_mem_gb}GB"
   else
-    mem_display="${free_mem_mb}MB/${total_mem_gb}GB free"
+    mem_display="${free_mem_mb}MB free / ${total_mem_gb}GB"
   fi
 else
   # Linux
@@ -1055,9 +1056,9 @@ else
   total_mem_gb_linux=$(awk "BEGIN {printf \"%.0f\", ${total_mem_mb_linux:-0} / 1024}")
   if [ -n "$free_mem_mb_linux" ] && [ "$free_mem_mb_linux" -ge 1024 ] 2>/dev/null; then
     free_mem_gb_linux=$(awk "BEGIN {printf \"%.1f\", $free_mem_mb_linux / 1024}")
-    mem_display="${free_mem_gb_linux}/${total_mem_gb_linux}GB free"
+    mem_display="${free_mem_gb_linux}GB free / ${total_mem_gb_linux}GB"
   else
-    mem_display="${free_mem_mb_linux:-?}MB/${total_mem_gb_linux}GB free"
+    mem_display="${free_mem_mb_linux:-?}MB free / ${total_mem_gb_linux}GB"
   fi
   mem_used_pct=$(free 2>/dev/null | awk '/^Mem:/ {printf "%.0f", ($2-$7)*100/$2}')
 fi
@@ -1070,21 +1071,21 @@ disk_display=$(df -h "${current_dir:-.}" 2>/dev/null | awk 'NR==2 {printf "%s fr
 disk_usage="${disk_usage:-0}"
 disk_display="${disk_display:-?}"
 
-# Active subagents (from heartbeat files in MEMORY/WORK)
-WORK_DIR="${CONFIG_DIR}/MEMORY/WORK"
-agent_names=""
+# Active subagents — count this session's background agents that are still
+# live. Source of truth: <project>/subagents/agent-*.jsonl (the real files
+# Claude Code writes per spawned agent). A running agent streams tokens, so its
+# jsonl mtime stays fresh; a finished agent goes stale. Window = 180s.
 agent_count=0
-if [ -d "$WORK_DIR" ]; then
-  now_epoch=$(date +%s)
-  agent_names=$(find "$WORK_DIR" -name 'heartbeat.txt' 2>/dev/null | while read hb; do
-    dir=$(dirname "$hb")
-    [ -f "$dir/COMPLETE" ] && continue
-    hb_time=$(cat "$hb" 2>/dev/null | tr -d '[:space:]')
-    [ -z "$hb_time" ] && continue
-    [ "$((now_epoch - hb_time))" -lt 900 ] && basename "$dir"
-  done | sort | tr '\n' ' ')
-  agent_count=$(echo "$agent_names" | wc -w | tr -d ' ')
-  [ -z "$agent_names" ] && agent_count=0
+if [ -n "$transcript_path" ]; then
+  subagents_dir="$(dirname "$transcript_path")/subagents"
+  if [ -d "$subagents_dir" ]; then
+    now_epoch=$(date +%s)
+    agent_count=$(find "$subagents_dir" -name 'agent-*.jsonl' -type f 2>/dev/null | while read -r f; do
+      mt=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null)
+      [ -n "$mt" ] && [ "$((now_epoch - mt))" -lt 180 ] && echo x
+    done | wc -l | tr -d ' ')
+    agent_count="${agent_count:-0}"
+  fi
 fi
 
 # Session turn count (estimate from conversation history size)
@@ -1261,7 +1262,7 @@ render_body() {
   [ -n "$T_ICON_SES" ] && printf "${T_ACCENT3}${T_ICON_SES}${RESET} "
   printf "${T_VALUE}${time_dur}${RESET}"
   [ -n "$cost_display" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_VALUE}${cost_display}${RESET}"
-  printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}A:${RESET} "
+  printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Agents:${RESET} "
   if [ "$agent_count" -gt 0 ] 2>/dev/null; then
     printf "${T_GREEN}${agent_count}${RESET}"
   else

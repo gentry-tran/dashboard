@@ -1020,7 +1020,10 @@ time_display=$(date +"%l:%M %p" | sed 's/^ //')
 time_full="$time_display $tz_abbr"
 
 # Skills count
-skills_count=$(find "$CONFIG_DIR/skills" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l | tr -d ' ')
+skills_count=$({
+  find "$CONFIG_DIR/skills" -mindepth 2 -maxdepth 3 -name 'SKILL.md' 2>/dev/null
+  find "$CONFIG_DIR/plugins" -name 'SKILL.md' 2>/dev/null
+} | wc -l | tr -d ' ')
 
 # MCP servers count
 mcp_count=$(jq -r '.mcpServers // {} | keys | length' "$CONFIG_DIR/settings.json" 2>/dev/null || echo "0")
@@ -1167,51 +1170,20 @@ make_line() {
 # RENDER
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Line 1: Header
-if [ "$THEME" = "cyberpunk" ]; then
-  printf "${T_BORDER}╔══ ${T_TITLE}${T_HEADER}${RESET} ${T_BORDER}"
-  for ((i=0; i<58; i++)); do printf "═"; done
-  printf "╗${RESET}\n"
-elif [ "$THEME" = "minimal" ]; then
-  printf "${T_TITLE}${T_HEADER}${RESET}\n"
-else
-  printf "${T_BORDER}━━━━ ${T_TITLE}${T_HEADER}${RESET} ${T_BORDER}"
-  for ((i=0; i<58; i++)); do printf "━"; done
-  printf "${RESET}\n"
-fi
-
-# Line 2: Location + Time + Weather
-# Colors: cyan labels, neon red city, cyan time value, neon red weather
-location_str=""
-[ -n "$city" ] && location_str="${T_ACCENT3}Location:${RESET} ${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region}${RESET}"
-time_str="${T_ACCENT3}Time:${RESET} ${T_VALUE}${time_full}${RESET}"
-weather_str=""
-[ -n "$temp_c" ] && weather_str="${T_WEATHER}${temp_c}°C | ${temp_f}°F ${weather_desc}${RESET}"
-
-if [ -n "$location_str" ]; then
-  printf "${location_str} ${T_BORDER}${T_SEP}${RESET} ${time_str}"
-  [ -n "$weather_str" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${weather_str}"
-  printf "\n"
-else
-  printf "${time_str}"
-  [ -n "$weather_str" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${weather_str}"
-  printf "\n"
-fi
-
-# Line 3: Claude Code version + Model + Skills + MCP + Account + Plan (single line)
-# Colors: orange version, pink labels, green values
-printf "${T_ACCENT2}Claude Code v${cc_version}${RESET} ${T_BORDER}${T_SEP}${RESET} "
-printf "${T_ACCENT1}Model:${RESET} ${T_VALUE}${model_name}${RESET} ${T_BORDER}${T_SEP}${RESET} "
-printf "${T_ACCENT1}Skills:${RESET} ${T_VALUE}${skills_count}${RESET} ${T_BORDER}${T_SEP}${RESET} "
-printf "${T_ACCENT1}MCP:${RESET} ${T_VALUE}${mcp_count}${RESET}"
+# Line 1: CC version | Model | Skills | Account+Plan | Location | Weather
+printf "${T_ACCENT2}CC v${cc_version}${RESET}"
+printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Model:${RESET} ${T_VALUE}${model_name}${RESET}"
+printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Skills:${RESET} ${T_VALUE}${skills_count}${RESET}"
 if [ -n "$account_email" ]; then
   account_short="${account_email%@*}"
   printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}${account_short}${RESET}"
-  [ -n "$account_sub" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_VALUE}${account_sub}${RESET}"
+  [ -n "$account_sub" ] && printf " ${T_VALUE}(${account_sub})${RESET}"
 fi
+[ -n "$city" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region}${RESET}"
+[ -n "$temp_c" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_WEATHER}${temp_c}°C | ${temp_f}°F ${weather_desc}${RESET}"
 printf "\n"
 
-# Line 4: Usage — Session + Week side-by-side (compact bars)
+# Line 2: Session bar | Week bar | Context bar
 usage_5h_int="${usage_5h%%.*}"
 usage_7d_int="${usage_7d%%.*}"
 usage_5h_int="${usage_5h_int:-0}"
@@ -1219,26 +1191,21 @@ usage_7d_int="${usage_7d_int:-0}"
 
 [ -n "$T_ICON_USE" ] && printf "${T_ACCENT2}${T_ICON_USE}${RESET} "
 printf "${T_ACCENT3}S:${RESET} "
-build_bar "$usage_5h_int" 12 "$T_BAR_SESSION"
+build_bar "$usage_5h_int" 10 "$T_BAR_SESSION"
 printf " ${T_BAR_SESSION}${usage_5h_int}%%${RESET}"
 [ -n "$reset_5h" ] && printf " ${T_ACCENT4}(${reset_5h})${RESET}"
-printf "  ${T_BORDER}${T_SEP}${RESET}  "
+printf " ${T_BORDER}${T_SEP}${RESET} "
 printf "${T_ACCENT3}W:${RESET} "
-build_bar "$usage_7d_int" 12 "$T_BAR_WEEK"
+build_bar "$usage_7d_int" 10 "$T_BAR_WEEK"
 printf " ${T_BAR_WEEK}${usage_7d_int}%%${RESET}"
 [ -n "$reset_7d" ] && printf " ${T_ACCENT4}(${reset_7d})${RESET}"
+printf " ${T_BORDER}${T_SEP}${RESET} "
+printf "${T_ACCENT4}Ctx:${RESET} "
+build_bar "$context_pct" 10 "$T_BAR_CTX"
+printf " ${T_BAR_CTX}${context_pct}%%${RESET} ${T_LABEL}(${context_k}k/${max_k}k)${RESET}"
 printf "\n"
 
-# Line 6: Context
-[ -n "$T_ICON_CTX" ] && printf "${T_ACCENT4}${T_ICON_CTX}${RESET} "
-printf "${T_ACCENT4}Context:${RESET} "
-build_bar "$context_pct" 30 "$T_BAR_CTX"
-printf " ${T_BAR_CTX}${context_pct}%%${RESET} ${T_LABEL}(${context_k}k/${max_k}k)${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} "
-[ -n "$T_ICON_TIME" ] && printf "${T_ACCENT3}${T_ICON_TIME}${RESET} "
-printf "${T_VALUE}${time_dur}${RESET}\n"
-
-# Line 6: Session-time + Cost + Agents + System (CPU/Mem/Disk) on single line
+# Line 3: Session-time | Cost | Agents | CPU | Mem | Disk
 sys_color_cpu=$(get_level_color "$(echo "$cpu_load" | awk '{printf "%.0f", $1 * 25}')" 2>/dev/null)
 sys_color_mem=$(get_level_color "$mem_used_pct")
 sys_color_disk=$(get_level_color "$disk_usage")
@@ -1257,14 +1224,3 @@ printf "${T_ACCENT3}CPU:${RESET} ${sys_color_cpu:-$T_VALUE}%s${RESET}" "$cpu_loa
 printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Mem:${RESET} ${sys_color_mem:-$T_VALUE}%s${RESET}" "$mem_display"
 printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Disk:${RESET} ${sys_color_disk:-$T_VALUE}%s${RESET}" "$disk_display"
 printf "\n"
-
-# Footer
-if [ "$THEME" = "cyberpunk" ]; then
-  printf "${T_BORDER}╚"
-  for ((i=0; i<73; i++)); do printf "═"; done
-  printf "╝${RESET}\n"
-elif [ "$THEME" != "minimal" ]; then
-  if [ -n "$T_LINE_TOP" ]; then
-    make_line "$T_LINE_TOP"
-  fi
-fi

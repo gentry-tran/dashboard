@@ -1206,29 +1206,17 @@ rule_bot() {
 # render_body: all content lines (no frame) — buffered so the frame can be
 # sized to whatever the content actually is.
 render_body() {
-  # Line 1: CC version | Model | Account+Plan
+  # Line 1: CC version | Model | Account+Plan | Location | Weather
   printf "${T_ACCENT2}CC v${cc_version}${RESET}"
-  printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Model:${RESET} ${T_VALUE}${model_name}${RESET}"
+  printf " ${T_BORDER}${T_SEP}${RESET} ${T_VALUE}${model_name}${RESET}"
   if [ -n "$account_email" ]; then
     account_short="${account_email%@*}"
     printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}${account_short}${RESET}"
     [ -n "$account_sub" ] && printf " ${T_VALUE}(${account_sub})${RESET}"
   fi
+  [ -n "$city" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region}${RESET}"
+  [ -n "$temp_c" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_WEATHER}${temp_c}°C | ${temp_f}°F ${weather_desc}${RESET}"
   printf "\n"
-
-  # Line 2: Location | Weather (own line — keeps each line narrow so the frame fits)
-  if [ -n "$city" ] || [ -n "$temp_c" ]; then
-    local wrote=0
-    if [ -n "$city" ]; then
-      printf "${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region}${RESET}"
-      wrote=1
-    fi
-    if [ -n "$temp_c" ]; then
-      [ "$wrote" -eq 1 ] && printf " ${T_BORDER}${T_SEP}${RESET} "
-      printf "${T_WEATHER}${temp_c}°C | ${temp_f}°F ${weather_desc}${RESET}"
-    fi
-    printf "\n"
-  fi
 
   # Lines 2-4: Session / Week / Context bars (one per line)
   local usage_5h_int="${usage_5h%%.*}"

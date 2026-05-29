@@ -1254,7 +1254,7 @@ render_body() {
   fi
   [ -n "$city" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region_disp}${RESET}"
   [ -n "$temp_disp" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_WEATHER}${temp_disp} ${weather_desc}${RESET}"
-  [ -n "$time_dur" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Session Duration:${RESET} ${T_VALUE}${time_dur}${RESET}"
+  [ -n "$time_dur" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Uptime:${RESET} ${T_VALUE}${time_dur}${RESET}"
   printf "\n"
 
   # Lines 2-4: Session / Week / Context bars (one per line)

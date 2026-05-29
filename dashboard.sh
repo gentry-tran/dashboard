@@ -1254,6 +1254,7 @@ render_body() {
   fi
   [ -n "$city" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region_disp}${RESET}"
   [ -n "$temp_disp" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_WEATHER}${temp_disp} ${weather_desc}${RESET}"
+  [ -n "$time_dur" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Session Duration:${RESET} ${T_VALUE}${time_dur}${RESET}"
   printf "\n"
 
   # Lines 2-4: Session / Week / Context bars (one per line)
@@ -1297,8 +1298,7 @@ render_body() {
   sys_color_disk=$(get_level_color "$disk_usage")
 
   [ -n "$T_ICON_SES" ] && printf "${T_ACCENT3}${T_ICON_SES}${RESET} "
-  printf "${T_VALUE}${time_dur}${RESET}"
-  [ -n "$cost_display" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_VALUE}${cost_display}${RESET}"
+  printf "${T_ACCENT1}Cost:${RESET} ${T_VALUE}${cost_display:-\$0.00}${RESET}"
   printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Agents:${RESET} "
   if [ "$agent_count" -gt 0 ] 2>/dev/null; then
     printf "${T_GREEN}${agent_count}${RESET}"

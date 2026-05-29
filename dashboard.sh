@@ -1170,6 +1170,19 @@ make_line() {
 # RENDER
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Frame top
+if [ "$THEME" = "cyberpunk" ]; then
+  printf "${T_BORDER}╔══ ${T_TITLE}${T_HEADER}${RESET} ${T_BORDER}"
+  for ((i=0; i<58; i++)); do printf "═"; done
+  printf "╗${RESET}\n"
+elif [ "$THEME" = "minimal" ]; then
+  :
+else
+  printf "${T_BORDER}━━━━ ${T_TITLE}${T_HEADER}${RESET} ${T_BORDER}"
+  for ((i=0; i<58; i++)); do printf "━"; done
+  printf "${RESET}\n"
+fi
+
 # Line 1: CC version | Model | Skills | Account+Plan | Location | Weather
 printf "${T_ACCENT2}CC v${cc_version}${RESET}"
 printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Model:${RESET} ${T_VALUE}${model_name}${RESET}"
@@ -1224,3 +1237,12 @@ printf "${T_ACCENT3}CPU:${RESET} ${sys_color_cpu:-$T_VALUE}%s${RESET}" "$cpu_loa
 printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Mem:${RESET} ${sys_color_mem:-$T_VALUE}%s${RESET}" "$mem_display"
 printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Disk:${RESET} ${sys_color_disk:-$T_VALUE}%s${RESET}" "$disk_display"
 printf "\n"
+
+# Frame bottom
+if [ "$THEME" = "cyberpunk" ]; then
+  printf "${T_BORDER}╚"
+  for ((i=0; i<73; i++)); do printf "═"; done
+  printf "╝${RESET}\n"
+elif [ "$THEME" != "minimal" ] && [ -n "$T_LINE_TOP" ]; then
+  make_line "$T_LINE_TOP"
+fi

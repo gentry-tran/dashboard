@@ -1170,90 +1170,141 @@ make_line() {
 # RENDER
 # ─────────────────────────────────────────────────────────────────────────────
 
-# Frame top
-if [ "$THEME" = "cyberpunk" ]; then
-  printf "${T_BORDER}╔══ ${T_TITLE}${T_HEADER}${RESET} ${T_BORDER}"
-  for ((i=0; i<58; i++)); do printf "═"; done
+# disp_width: visible column width of a string (strips ANSI, wcwidth-aware for
+# wide glyphs like the weather emoji). Falls back to byte-ish count if no python.
+disp_width() {
+  printf '%s' "$1" | sed $'s/\x1b\\[[0-9;]*m//g' | python3 -c '
+import sys, unicodedata
+def w(s):
+    t = 0
+    for ch in s:
+        if unicodedata.combining(ch):
+            continue
+        t += 2 if unicodedata.east_asian_width(ch) in ("W", "F") else 1
+    return t
+print(max((w(l) for l in sys.stdin.read().splitlines()), default=0))
+' 2>/dev/null
+}
+
+# rule_top / rule_bot: draw a frame rule of exactly $1 columns
+rule_top() {
+  local w="$1" hdr="${T_HEADER}" used fill i
+  used=$(( 4 + ${#hdr} + 1 + 1 ))   # "╔══ " + header + " " + "╗"
+  fill=$(( w - used )); [ "$fill" -lt 0 ] && fill=0
+  printf "${T_BORDER}╔══ ${T_TITLE}${hdr}${RESET} ${T_BORDER}"
+  for ((i=0; i<fill; i++)); do printf "═"; done
   printf "╗${RESET}\n"
+}
+rule_bot() {
+  local w="$1" fill i
+  fill=$(( w - 2 )); [ "$fill" -lt 0 ] && fill=0
+  printf "${T_BORDER}╚"
+  for ((i=0; i<fill; i++)); do printf "═"; done
+  printf "╝${RESET}\n"
+}
+
+# render_body: all content lines (no frame) — buffered so the frame can be
+# sized to whatever the content actually is.
+render_body() {
+  # Line 1: CC version | Model | Account+Plan
+  printf "${T_ACCENT2}CC v${cc_version}${RESET}"
+  printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Model:${RESET} ${T_VALUE}${model_name}${RESET}"
+  if [ -n "$account_email" ]; then
+    account_short="${account_email%@*}"
+    printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}${account_short}${RESET}"
+    [ -n "$account_sub" ] && printf " ${T_VALUE}(${account_sub})${RESET}"
+  fi
+  printf "\n"
+
+  # Line 2: Location | Weather (own line — keeps each line narrow so the frame fits)
+  if [ -n "$city" ] || [ -n "$temp_c" ]; then
+    local wrote=0
+    if [ -n "$city" ]; then
+      printf "${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region}${RESET}"
+      wrote=1
+    fi
+    if [ -n "$temp_c" ]; then
+      [ "$wrote" -eq 1 ] && printf " ${T_BORDER}${T_SEP}${RESET} "
+      printf "${T_WEATHER}${temp_c}°C | ${temp_f}°F ${weather_desc}${RESET}"
+    fi
+    printf "\n"
+  fi
+
+  # Lines 2-4: Session / Week / Context bars (one per line)
+  local usage_5h_int="${usage_5h%%.*}"
+  local usage_7d_int="${usage_7d%%.*}"
+  usage_5h_int="${usage_5h_int:-0}"
+  usage_7d_int="${usage_7d_int:-0}"
+
+  # Icons are equal-width (all 2-col emoji) and labels padded to 8 chars so all
+  # three bars start at the same column. Icons chosen to match each metric:
+  #   ⏳ Session (5-hour rolling window)  📆 Week (7-day window)  🧠 Context (window fill)
+  printf "${T_ACCENT2}⏳${RESET} ${T_ACCENT3}Session:${RESET} "
+  build_bar "$usage_5h_int" 30 "$T_BAR_SESSION"
+  printf " ${T_BAR_SESSION}${usage_5h_int}%%${RESET}"
+  if [ -n "$reset_5h" ]; then
+    local reset_5h_detail="${reset_5h}"
+    [ -n "$reset_5h_abs" ] && reset_5h_detail="${reset_5h}, ${reset_5h_abs}"
+    printf " ${T_ACCENT4}(${reset_5h_detail})${RESET}"
+  fi
+  printf "\n"
+
+  printf "${T_ACCENT2}📆${RESET} ${T_ACCENT3}Week:   ${RESET} "
+  build_bar "$usage_7d_int" 30 "$T_BAR_WEEK"
+  printf " ${T_BAR_WEEK}${usage_7d_int}%%${RESET}"
+  if [ -n "$reset_7d" ]; then
+    local reset_7d_detail="${reset_7d}"
+    [ -n "$reset_7d_abs" ] && reset_7d_detail="${reset_7d}, ${reset_7d_abs}"
+    printf " ${T_ACCENT4}(${reset_7d_detail})${RESET}"
+  fi
+  printf "\n"
+
+  printf "${T_ACCENT4}🧠${RESET} ${T_ACCENT4}Context:${RESET} "
+  build_bar "$context_pct" 30 "$T_BAR_CTX"
+  printf " ${T_BAR_CTX}${context_pct}%%${RESET} ${T_LABEL}(${context_k}k/${max_k}k)${RESET}"
+  printf "\n"
+
+  # Line 5: Session-time | Cost | Agents | CPU | Mem | Disk
+  local sys_color_cpu sys_color_mem sys_color_disk
+  sys_color_cpu=$(get_level_color "$(echo "$cpu_load" | awk '{printf "%.0f", $1 * 25}')" 2>/dev/null)
+  sys_color_mem=$(get_level_color "$mem_used_pct")
+  sys_color_disk=$(get_level_color "$disk_usage")
+
+  [ -n "$T_ICON_SES" ] && printf "${T_ACCENT3}${T_ICON_SES}${RESET} "
+  printf "${T_VALUE}${time_dur}${RESET}"
+  [ -n "$cost_display" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_VALUE}${cost_display}${RESET}"
+  printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}A:${RESET} "
+  if [ "$agent_count" -gt 0 ] 2>/dev/null; then
+    printf "${T_GREEN}${agent_count}${RESET}"
+  else
+    printf "${T_DIM}0${RESET}"
+  fi
+  printf " ${T_BORDER}${T_SEP}${RESET} "
+  printf "${T_ACCENT3}CPU:${RESET} ${sys_color_cpu:-$T_VALUE}%s${RESET}" "$cpu_load"
+  printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Mem:${RESET} ${sys_color_mem:-$T_VALUE}%s${RESET}" "$mem_display"
+  printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Disk:${RESET} ${sys_color_disk:-$T_VALUE}%s${RESET}" "$disk_display"
+  printf "\n"
+}
+
+# Buffer body, size the frame to the widest visible content line
+body="$(render_body)"
+box_w=$(disp_width "$body")
+[ -z "$box_w" ] && box_w=0
+box_w=$(( box_w + 1 ))                     # one column of breathing room
+[ "$box_w" -lt 50 ] && box_w=50            # floor so the title rule isn't cramped
+term_cap=$(( TERM_WIDTH - 1 ))
+[ "$term_cap" -ge 50 ] && [ "$box_w" -gt "$term_cap" ] && box_w=$term_cap  # never exceed terminal
+
+if [ "$THEME" = "cyberpunk" ]; then
+  rule_top "$box_w"
+  printf '%s\n' "$body"
+  rule_bot "$box_w"
 elif [ "$THEME" = "minimal" ]; then
-  :
+  printf '%s\n' "$body"
 else
   printf "${T_BORDER}━━━━ ${T_TITLE}${T_HEADER}${RESET} ${T_BORDER}"
   for ((i=0; i<58; i++)); do printf "━"; done
   printf "${RESET}\n"
-fi
-
-# Line 1: CC version | Model | Account+Plan | Location | Weather
-printf "${T_ACCENT2}CC v${cc_version}${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Model:${RESET} ${T_VALUE}${model_name}${RESET}"
-if [ -n "$account_email" ]; then
-  account_short="${account_email%@*}"
-  printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}${account_short}${RESET}"
-  [ -n "$account_sub" ] && printf " ${T_VALUE}(${account_sub})${RESET}"
-fi
-[ -n "$city" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region}${RESET}"
-[ -n "$temp_c" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_WEATHER}${temp_c}°C | ${temp_f}°F ${weather_desc}${RESET}"
-printf "\n"
-
-# Lines 2-4: Session / Week / Context bars (one per line, full-width)
-usage_5h_int="${usage_5h%%.*}"
-usage_7d_int="${usage_7d%%.*}"
-usage_5h_int="${usage_5h_int:-0}"
-usage_7d_int="${usage_7d_int:-0}"
-
-[ -n "$T_ICON_USE" ] && printf "${T_ACCENT2}${T_ICON_USE}${RESET} "
-printf "${T_ACCENT3}Session:${RESET} "
-build_bar "$usage_5h_int" 30 "$T_BAR_SESSION"
-printf " ${T_BAR_SESSION}${usage_5h_int}%%${RESET}"
-if [ -n "$reset_5h" ]; then
-  reset_5h_detail="${reset_5h}"
-  [ -n "$reset_5h_abs" ] && reset_5h_detail="${reset_5h}, ${reset_5h_abs}"
-  printf " ${T_ACCENT4}(${reset_5h_detail})${RESET}"
-fi
-printf "\n"
-
-[ -n "$T_ICON_USE" ] && printf "${T_ACCENT2}${T_ICON_USE}${RESET} "
-printf "${T_ACCENT3}Week:${RESET}    "
-build_bar "$usage_7d_int" 30 "$T_BAR_WEEK"
-printf " ${T_BAR_WEEK}${usage_7d_int}%%${RESET}"
-if [ -n "$reset_7d" ]; then
-  reset_7d_detail="${reset_7d}"
-  [ -n "$reset_7d_abs" ] && reset_7d_detail="${reset_7d}, ${reset_7d_abs}"
-  printf " ${T_ACCENT4}(${reset_7d_detail})${RESET}"
-fi
-printf "\n"
-
-[ -n "$T_ICON_CTX" ] && printf "${T_ACCENT4}${T_ICON_CTX}${RESET} "
-printf "${T_ACCENT4}Context:${RESET} "
-build_bar "$context_pct" 30 "$T_BAR_CTX"
-printf " ${T_BAR_CTX}${context_pct}%%${RESET} ${T_LABEL}(${context_k}k/${max_k}k)${RESET}"
-printf "\n"
-
-# Line 3: Session-time | Cost | Agents | CPU | Mem | Disk
-sys_color_cpu=$(get_level_color "$(echo "$cpu_load" | awk '{printf "%.0f", $1 * 25}')" 2>/dev/null)
-sys_color_mem=$(get_level_color "$mem_used_pct")
-sys_color_disk=$(get_level_color "$disk_usage")
-
-[ -n "$T_ICON_SES" ] && printf "${T_ACCENT3}${T_ICON_SES}${RESET} "
-printf "${T_VALUE}${time_dur}${RESET}"
-[ -n "$cost_display" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_VALUE}${cost_display}${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}A:${RESET} "
-if [ "$agent_count" -gt 0 ] 2>/dev/null; then
-  printf "${T_GREEN}${agent_count}${RESET}"
-else
-  printf "${T_DIM}0${RESET}"
-fi
-printf " ${T_BORDER}${T_SEP}${RESET} "
-printf "${T_ACCENT3}CPU:${RESET} ${sys_color_cpu:-$T_VALUE}%s${RESET}" "$cpu_load"
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Mem:${RESET} ${sys_color_mem:-$T_VALUE}%s${RESET}" "$mem_display"
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Disk:${RESET} ${sys_color_disk:-$T_VALUE}%s${RESET}" "$disk_display"
-printf "\n"
-
-# Frame bottom
-if [ "$THEME" = "cyberpunk" ]; then
-  printf "${T_BORDER}╚"
-  for ((i=0; i<73; i++)); do printf "═"; done
-  printf "╝${RESET}\n"
-elif [ "$THEME" != "minimal" ] && [ -n "$T_LINE_TOP" ]; then
-  make_line "$T_LINE_TOP"
+  printf '%s\n' "$body"
+  [ -n "$T_LINE_TOP" ] && make_line "$T_LINE_TOP"
 fi

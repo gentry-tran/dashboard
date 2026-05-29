@@ -1183,10 +1183,9 @@ else
   printf "${RESET}\n"
 fi
 
-# Line 1: CC version | Model | Skills | Account+Plan | Location | Weather
+# Line 1: CC version | Model | Account+Plan | Location | Weather
 printf "${T_ACCENT2}CC v${cc_version}${RESET}"
 printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Model:${RESET} ${T_VALUE}${model_name}${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Skills:${RESET} ${T_VALUE}${skills_count}${RESET}"
 if [ -n "$account_email" ]; then
   account_short="${account_email%@*}"
   printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}${account_short}${RESET}"
@@ -1196,25 +1195,37 @@ fi
 [ -n "$temp_c" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_WEATHER}${temp_c}°C | ${temp_f}°F ${weather_desc}${RESET}"
 printf "\n"
 
-# Line 2: Session bar | Week bar | Context bar
+# Lines 2-4: Session / Week / Context bars (one per line, full-width)
 usage_5h_int="${usage_5h%%.*}"
 usage_7d_int="${usage_7d%%.*}"
 usage_5h_int="${usage_5h_int:-0}"
 usage_7d_int="${usage_7d_int:-0}"
 
 [ -n "$T_ICON_USE" ] && printf "${T_ACCENT2}${T_ICON_USE}${RESET} "
-printf "${T_ACCENT3}S:${RESET} "
-build_bar "$usage_5h_int" 10 "$T_BAR_SESSION"
+printf "${T_ACCENT3}Session:${RESET} "
+build_bar "$usage_5h_int" 30 "$T_BAR_SESSION"
 printf " ${T_BAR_SESSION}${usage_5h_int}%%${RESET}"
-[ -n "$reset_5h" ] && printf " ${T_ACCENT4}(${reset_5h})${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} "
-printf "${T_ACCENT3}W:${RESET} "
-build_bar "$usage_7d_int" 10 "$T_BAR_WEEK"
+if [ -n "$reset_5h" ]; then
+  reset_5h_detail="${reset_5h}"
+  [ -n "$reset_5h_abs" ] && reset_5h_detail="${reset_5h}, ${reset_5h_abs}"
+  printf " ${T_ACCENT4}(${reset_5h_detail})${RESET}"
+fi
+printf "\n"
+
+[ -n "$T_ICON_USE" ] && printf "${T_ACCENT2}${T_ICON_USE}${RESET} "
+printf "${T_ACCENT3}Week:${RESET}    "
+build_bar "$usage_7d_int" 30 "$T_BAR_WEEK"
 printf " ${T_BAR_WEEK}${usage_7d_int}%%${RESET}"
-[ -n "$reset_7d" ] && printf " ${T_ACCENT4}(${reset_7d})${RESET}"
-printf " ${T_BORDER}${T_SEP}${RESET} "
-printf "${T_ACCENT4}Ctx:${RESET} "
-build_bar "$context_pct" 10 "$T_BAR_CTX"
+if [ -n "$reset_7d" ]; then
+  reset_7d_detail="${reset_7d}"
+  [ -n "$reset_7d_abs" ] && reset_7d_detail="${reset_7d}, ${reset_7d_abs}"
+  printf " ${T_ACCENT4}(${reset_7d_detail})${RESET}"
+fi
+printf "\n"
+
+[ -n "$T_ICON_CTX" ] && printf "${T_ACCENT4}${T_ICON_CTX}${RESET} "
+printf "${T_ACCENT4}Context:${RESET} "
+build_bar "$context_pct" 30 "$T_BAR_CTX"
 printf " ${T_BAR_CTX}${context_pct}%%${RESET} ${T_LABEL}(${context_k}k/${max_k}k)${RESET}"
 printf "\n"
 

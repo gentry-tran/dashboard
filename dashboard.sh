@@ -1311,14 +1311,15 @@ render_body() {
   local _authf="$HOME/hacking-workspace/hydra/state/auth-status.json"
   printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Auth:${RESET} "
   # Fail-safe dot: GREEN only if the status file says GREEN *and* is fresh.
-  # The writer (m-auth-status cron, ~15min cadence) can stall — when it does the
-  # file freezes at its last value. Trusting a stale GREEN showed a 7h-dead auth
-  # as live (2026-06-02). Stale (>20min) or RED or missing -> RED, never green.
+  # The writer (m-auth-status cron, every-minute cadence) can stall — when it does
+  # the file freezes at its last value. Trusting a stale GREEN showed a 7h-dead
+  # auth as live (2026-06-02). Freshness window 180s = 3x the 60s write cadence,
+  # matching crons.json tick_evidence max_age_min:3. Stale/RED/missing -> RED.
   local _authage=999999
   [ -f "$_authf" ] && _authage=$(( $(date +%s) - $(stat -f %m "$_authf" 2>/dev/null || echo 0) ))
-  if [ "$_authage" -le 1200 ] && grep -q '"state":"GREEN"' "$_authf" 2>/dev/null; then
+  if [ "$_authage" -le 180 ] && grep -q '"state":"GREEN"' "$_authf" 2>/dev/null; then
     printf "${T_GREEN}\xF0\x9F\x9F\xA2${RESET}"
-  elif [ "$_authage" -gt 1200 ]; then
+  elif [ "$_authage" -gt 180 ]; then
     printf "${T_RED}\xF0\x9F\x94\xB4${RESET}${T_DIM:-} (stale)${RESET}"
   else
     printf "${T_RED}\xF0\x9F\x94\xB4${RESET}"

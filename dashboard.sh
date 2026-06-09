@@ -1026,25 +1026,34 @@ format_reset() {
   fi
 }
 
-# Format reset times — absolute day + time (e.g., "8:30 PM" or "Wed 8:00 AM")
+# Format reset times — absolute day + time (e.g., "8:30 PM" or "Wed 8:00 AM").
+# Rendered in the user's ACTUAL location timezone (geo from location.json's
+# `timezone`, e.g. Europe/Paris), NOT the OS timezone. A laptop whose OS clock is
+# still on a prior zone (e.g. America/Denver while physically in Europe/Paris)
+# would otherwise mislabel every reset by the TZ offset (8h) — making a fixed
+# server-side reset look like it fired hours early/late (2026-06-09 incident).
+# Subshell isolates the TZ export so it doesn't pollute the rest of the dashboard.
 format_reset_abs() {
   local reset_ts="$1"
   [ -z "$reset_ts" ] && return
   local reset_epoch
   reset_epoch=$(parse_iso_epoch "$reset_ts")
   [ -z "$reset_epoch" ] && return
-  local now_day=$(date +%Y%j)
-  local reset_day
-  reset_day=$(date -r "$reset_epoch" +%Y%j 2>/dev/null) || reset_day=$(date -d "@$reset_epoch" +%Y%j 2>/dev/null)
-  if [ "$now_day" = "$reset_day" ]; then
-    # Today — just show time
-    date -r "$reset_epoch" "+%l:%M %p" 2>/dev/null | sed 's/^ *//' || \
-    date -d "@$reset_epoch" "+%-I:%M %p" 2>/dev/null
-  else
-    # Different day — show day name + time
-    date -r "$reset_epoch" "+%a %l:%M %p" 2>/dev/null | sed 's/  / /' || \
-    date -d "@$reset_epoch" "+%a %-I:%M %p" 2>/dev/null
-  fi
+  (
+    [ -n "${timezone_name:-}" ] && export TZ="$timezone_name"
+    local now_day reset_day
+    now_day=$(date +%Y%j)
+    reset_day=$(date -r "$reset_epoch" +%Y%j 2>/dev/null) || reset_day=$(date -d "@$reset_epoch" +%Y%j 2>/dev/null)
+    if [ "$now_day" = "$reset_day" ]; then
+      # Today — just show time
+      date -r "$reset_epoch" "+%l:%M %p" 2>/dev/null | sed 's/^ *//' || \
+      date -d "@$reset_epoch" "+%-I:%M %p" 2>/dev/null
+    else
+      # Different day — show day name + time
+      date -r "$reset_epoch" "+%a %l:%M %p" 2>/dev/null | sed 's/  / /' || \
+      date -d "@$reset_epoch" "+%a %-I:%M %p" 2>/dev/null
+    fi
+  )
 }
 
 reset_5h=$(format_reset "$usage_5h_reset")

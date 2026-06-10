@@ -1287,6 +1287,24 @@ printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Mem:${RESET} ${sys_color_mem:-$
 printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Disk:${RESET} ${sys_color_disk:-$T_VALUE}%s${RESET}" "$disk_display"
 printf "\n"
 
+# ─── Plugins ─────────────────────────────────────────────────────────────────
+# Drop-in extensions. Any executable in $DASHBOARD_PLUGIN_DIR (default
+# $CONFIG_DIR/dashboard-plugins) is run in lexical order and its stdout is
+# appended as an extra dashboard line. Plugins inherit the active theme palette
+# via exported T_* / THEME / RESET vars so their output matches the theme, and
+# may read the statusline JSON from $DASHBOARD_STDIN_JSON. A plugin that prints
+# nothing renders nothing — keep domain-specific panels out of the core this way.
+DASHBOARD_PLUGIN_DIR="${DASHBOARD_PLUGIN_DIR:-$CONFIG_DIR/dashboard-plugins}"
+if [ -d "$DASHBOARD_PLUGIN_DIR" ]; then
+  export THEME RESET BOLD
+  export T_ACCENT1 T_ACCENT2 T_ACCENT3 T_ACCENT4 T_VALUE T_LABEL T_BORDER T_SEP T_GREEN T_YELLOW T_RED
+  for _plugin in "$DASHBOARD_PLUGIN_DIR"/*; do
+    [ -x "$_plugin" ] || continue
+    _plugin_out=$("$_plugin" 2>/dev/null)
+    [ -n "$_plugin_out" ] && printf "%b\n" "$_plugin_out"
+  done
+fi
+
 # Footer
 if [ "$THEME" = "cyberpunk" ]; then
   printf "${T_BORDER}╚"

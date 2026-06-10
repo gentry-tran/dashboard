@@ -241,6 +241,34 @@ my-theme)
 
 Use `\033[38;2;R;G;Bm` for RGB colors (true color terminals) or `\033[XXm` for basic 256-color.
 
+## Plugins
+
+Extend the dashboard without touching `dashboard.sh`. Any executable dropped in
+the plugin dir is run on each render and its stdout is appended as an extra line.
+
+- **Plugin dir:** `$DASHBOARD_PLUGIN_DIR` (default `$CONFIG_DIR/dashboard-plugins`, i.e. `~/.claude/dashboard-plugins`).
+- **Contract:** executable file → stdout becomes one dashboard line. Print nothing → render nothing (so a plugin can self-disable when its data source is absent).
+- **Theme access:** plugins inherit the active palette via exported vars — `THEME`, `RESET`, `T_ACCENT1..4`, `T_VALUE`, `T_LABEL`, `T_BORDER`, `T_SEP`, `T_GREEN`, `T_YELLOW`, `T_RED`. Use them so output matches the selected theme.
+- **Order:** plugins run in lexical filename order, after the System line and before the footer.
+
+Example — a plugin that prints a colored status dot from a JSON file:
+
+```bash
+#!/usr/bin/env bash
+# ~/.claude/dashboard-plugins/myservice.sh
+JSON="$HOME/.local/state/myservice.json"
+[ -f "$JSON" ] || exit 0                       # no data → render nothing
+state=$(jq -r '.state // empty' "$JSON" 2>/dev/null)
+[ -n "$state" ] || exit 0
+dot="🔴"; col="${T_RED}"
+[ "$state" = "OK" ] && { dot="🟢"; col="${T_GREEN}"; }
+printf "${T_ACCENT2}MyService:${RESET} ${dot} ${col}%s${RESET}" "$state"
+```
+
+```bash
+chmod +x ~/.claude/dashboard-plugins/myservice.sh
+```
+
 ## Contributing
 
 PRs welcome! Especially:

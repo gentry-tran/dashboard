@@ -1026,12 +1026,21 @@ format_reset() {
   fi
 }
 
+# Resolve the timezone the dashboard renders wall-clock times in.
+# Precedence: DASHBOARD_TZ override > IP-geolocation tz (location.json) > OS tz.
+# Default is the geo-IP timezone so reset times match where the operator actually
+# is, even when the laptop's OS clock is on a stale zone (e.g. OS still EDT while
+# physically in Europe/Paris — 2026-06-11). When geo-IP is wrong instead (VPN/proxy
+# exit in another country), pin the real zone with DASHBOARD_TZ=America/New_York.
+display_tz() {
+  if [ -n "${DASHBOARD_TZ:-}" ]; then echo "$DASHBOARD_TZ"
+  elif [ -n "${timezone_name:-}" ]; then echo "$timezone_name"
+  fi
+}
+
 # Format reset times — absolute day + time (e.g., "8:30 PM" or "Wed 8:00 AM").
-# Rendered in the user's ACTUAL location timezone (geo from location.json's
-# `timezone`, e.g. Europe/Paris), NOT the OS timezone. A laptop whose OS clock is
-# still on a prior zone (e.g. America/Denver while physically in Europe/Paris)
-# would otherwise mislabel every reset by the TZ offset (8h) — making a fixed
-# server-side reset look like it fired hours early/late (2026-06-09 incident).
+# Rendered in display_tz() so the absolute reset agrees with both the dashboard's
+# own clock line and the relative countdown beside it.
 # Subshell isolates the TZ export so it doesn't pollute the rest of the dashboard.
 format_reset_abs() {
   local reset_ts="$1"
@@ -1040,7 +1049,7 @@ format_reset_abs() {
   reset_epoch=$(parse_iso_epoch "$reset_ts")
   [ -z "$reset_epoch" ] && return
   (
-    [ -n "${timezone_name:-}" ] && export TZ="$timezone_name"
+    local _tz; _tz=$(display_tz); [ -n "$_tz" ] && export TZ="$_tz"
     local now_day reset_day
     now_day=$(date +%Y%j)
     reset_day=$(date -r "$reset_epoch" +%Y%j 2>/dev/null) || reset_day=$(date -d "@$reset_epoch" +%Y%j 2>/dev/null)
@@ -1060,11 +1069,6 @@ reset_5h=$(format_reset "$usage_5h_reset")
 reset_7d=$(format_reset "$usage_7d_reset")
 reset_5h_abs=$(format_reset_abs "$usage_5h_reset")
 reset_7d_abs=$(format_reset_abs "$usage_7d_reset")
-
-# Format time with timezone
-tz_abbr=$(date +%Z)
-time_display=$(date +"%l:%M %p" | sed 's/^ //')
-time_full="$time_display $tz_abbr"
 
 # Skills count
 skills_count=$({

@@ -1061,9 +1061,14 @@ reset_7d=$(format_reset "$usage_7d_reset")
 reset_5h_abs=$(format_reset_abs "$usage_5h_reset")
 reset_7d_abs=$(format_reset_abs "$usage_7d_reset")
 
-# Format time with timezone
-tz_abbr=$(date +%Z)
-time_display=$(date +"%l:%M %p" | sed 's/^ //')
+# Format time with timezone — render in the user's ACTUAL location timezone
+# (geo from location.json's `timezone`, e.g. Europe/Paris), NOT the OS timezone,
+# so the live clock matches the reset labels from format_reset_abs. A laptop
+# whose OS clock is still on a prior zone (e.g. America/Detroit while physically
+# in Europe/Paris) would otherwise show the wrong wall-clock time and make the
+# session/weekly reset look inconsistent. Subshell isolates the TZ export.
+tz_abbr=$( [ -n "${timezone_name:-}" ] && export TZ="$timezone_name"; date +%Z )
+time_display=$( [ -n "${timezone_name:-}" ] && export TZ="$timezone_name"; date +"%l:%M %p" | sed 's/^ *//' )
 time_full="$time_display $tz_abbr"
 
 # Skills count

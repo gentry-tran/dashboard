@@ -989,11 +989,25 @@ fi
 # Parse usage — stdin for percentages (fresh), API cache for resets_at (timestamps)
 usage_5h="" usage_7d="" usage_5h_reset="" usage_7d_reset=""
 
-# Percentages: prefer stdin (real-time from Claude Code), fallback to API cache
-if [ -n "$rl_5h_pct" ]; then
-  usage_5h="$rl_5h_pct"
-  [ -n "$rl_7d_pct" ] && usage_7d="$rl_7d_pct"
-fi
+# Percentages: prefer stdin (real-time from Claude Code), fallback to API cache.
+#
+# THE TWO WINDOWS ARE INDEPENDENT FIELDS AND MUST BE READ INDEPENDENTLY. The 7-day
+# assignment used to be NESTED inside the 5-hour presence check:
+#
+#     if [ -n "$rl_5h_pct" ]; then
+#       usage_5h="$rl_5h_pct"
+#       [ -n "$rl_7d_pct" ] && usage_7d="$rl_7d_pct"   # unreachable when 5h is absent
+#     fi
+#
+# so a payload carrying a fresh seven_day percentage but no five_hour one silently DROPPED
+# the 7-day value and fell through to the API cache below. The weekly number then displayed
+# a stale cached reading while looking live — the failure is invisible, because a plausible
+# percentage is shown either way and nothing indicates which source it came from.
+#
+# Nesting is what made it invisible: the 7-day value was conditioned on a variable that has
+# nothing to do with it.
+[ -n "$rl_5h_pct" ] && usage_5h="$rl_5h_pct"
+[ -n "$rl_7d_pct" ] && usage_7d="$rl_7d_pct"
 
 # Reset timestamps + fallback percentages from API cache
 if [ -f "$USAGE_CACHE" ]; then

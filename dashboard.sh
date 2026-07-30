@@ -1069,6 +1069,24 @@ display_tz() {
   fi
 }
 
+# Do the available zone sources AGREE? (2026-07-30)
+# geo-IP is preferred above, which is right when the OS clock is stale but wrong whenever the
+# IP is not where the operator is — VPN, proxy, corporate egress, or plain geo-IP error. Both
+# failure modes render a plausible wall-clock time, so neither is visible in the output.
+# Measured on this machine: OS zone America/Detroit, TZ env CEST, geo-IP America/Chicago, and
+# the operator in Denver. Four answers, none agreeing, and the dashboard silently picked one.
+#
+# This does not try to decide who is right — it cannot. It reports that the sources disagree so
+# a wrong time is attributable instead of mysterious.
+tz_sources_disagree() {
+  local geo="${timezone_name:-}" os
+  os=$(readlink /etc/localtime 2>/dev/null | sed 's|.*/zoneinfo/||')
+  [ -n "${DASHBOARD_TZ:-}" ] && return 1     # explicitly pinned — operator has decided
+  [ -z "$geo" ] || [ -z "$os" ] && return 1  # only one source; nothing to disagree with
+  [ "$geo" = "$os" ] && return 1
+  return 0
+}
+
 # Format reset times — absolute day + time (e.g., "8:30 PM" or "Wed 8:00 AM").
 # Rendered in display_tz() so the absolute reset agrees with both the dashboard's
 # own clock line and the relative countdown beside it.
@@ -1086,12 +1104,12 @@ format_reset_abs() {
     reset_day=$(date -r "$reset_epoch" +%Y%j 2>/dev/null) || reset_day=$(date -d "@$reset_epoch" +%Y%j 2>/dev/null)
     if [ "$now_day" = "$reset_day" ]; then
       # Today — just show time
-      date -r "$reset_epoch" "+%l:%M %p" 2>/dev/null | sed 's/^ *//' || \
-      date -d "@$reset_epoch" "+%-I:%M %p" 2>/dev/null
+      date -r "$reset_epoch" "+%l:%M %p %Z" 2>/dev/null | sed 's/^ *//' || \
+      date -d "@$reset_epoch" "+%-I:%M %p %Z" 2>/dev/null
     else
       # Different day — show day name + time
-      date -r "$reset_epoch" "+%a %l:%M %p" 2>/dev/null | sed 's/  / /' || \
-      date -d "@$reset_epoch" "+%a %-I:%M %p" 2>/dev/null
+      date -r "$reset_epoch" "+%a %l:%M %p %Z" 2>/dev/null | sed 's/  / /' || \
+      date -d "@$reset_epoch" "+%a %-I:%M %p %Z" 2>/dev/null
     fi
   )
 }

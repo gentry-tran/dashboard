@@ -1,0 +1,11 @@
+# Python bytecode — machine- and version-specific (cpython-314), never portable.
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
+
+# Stray directories created by tools that write an unexpanded literal path.
+# These appeared here once already; ignoring them stops a `git add -A` from tracking them.
+/~/
+/$HOME/

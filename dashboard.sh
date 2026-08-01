@@ -1308,17 +1308,26 @@ rule_bot() {
 render_body() {
   # Line 1: Cost | CC version | Model | Account+Plan | Location | Weather
   # (Cost moved to the TOP per operator 2026-06-01)
-  printf "${T_ACCENT1}Cost:${RESET} ${T_VALUE}${cost_display:-\$0.00}${RESET}"
-  printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT2}CC v${cc_version}${RESET}"
-  printf " ${T_BORDER}${T_SEP}${RESET} ${T_VALUE}${model_name}${RESET}"
+  # DATA IS NEVER PART OF THE FORMAT STRING (2026-07-31, shellcheck SC2059).
+  # These interpolated externally-sourced values — the model name, account, city, weather
+  # description — directly into printf's FORMAT argument, so any '%' in them was read as a
+  # conversion. Demonstrated with the real script: a model display name of "Opus %s %s %s"
+  # rendered as "Opus" (conversions consumed, substituted with nothing), and "Opus %d"
+  # rendered as "Opus 0" — printf inventing a zero that no input contained. Values come from
+  # a JSON payload and two network APIs, so none of them is ours to trust for format safety,
+  # and the corruption is silent: the panel still draws, it just shows something false.
+  # Colour constants stay in the format (ANSI escapes contain no '%'); data goes in as %s.
+  printf "${T_ACCENT1}Cost:${RESET} ${T_VALUE}%s${RESET}" "${cost_display:-\$0.00}"
+  printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT2}CC v%s${RESET}" "$cc_version"
+  printf " ${T_BORDER}${T_SEP}${RESET} ${T_VALUE}%s${RESET}" "$model_name"
   if [ -n "$account_email" ]; then
     account_short="${account_email%@*}"
-    printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}${account_short}${RESET}"
-    [ -n "$account_sub" ] && printf " ${T_VALUE}(${account_sub})${RESET}"
+    printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}%s${RESET}" "$account_short"
+    [ -n "$account_sub" ] && printf " ${T_VALUE}(%s)${RESET}" "$account_sub"
   fi
-  [ -n "$city" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_HIGHLIGHT}${city}${RESET}${T_BORDER},${RESET} ${T_ACCENT3}${region_disp}${RESET}"
-  [ -n "$temp_disp" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_WEATHER}${temp_disp} ${weather_desc}${RESET}"
-  [ -n "$time_dur" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Uptime:${RESET} ${T_VALUE}${time_dur}${RESET}"
+  [ -n "$city" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_HIGHLIGHT}%s${RESET}${T_BORDER},${RESET} ${T_ACCENT3}%s${RESET}" "$city" "$region_disp"
+  [ -n "$temp_disp" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_WEATHER}%s %s${RESET}" "$temp_disp" "$weather_desc"
+  [ -n "$time_dur" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Uptime:${RESET} ${T_VALUE}%s${RESET}" "$time_dur"
   printf "\n"
 
   # Lines 2-4: Session / Week / Context bars (one per line)
@@ -1361,31 +1370,21 @@ render_body() {
   sys_color_mem=$(get_level_color "$mem_used_pct")
   sys_color_disk=$(get_level_color "$disk_usage")
 
-  # Line 5: CPU | Mem | Disk | Auth  (Agents:0 + Hunters count REMOVED 2026-06-02 —
+  # Line 5: CPU | Mem | Disk  (Agents:0 + Hunters count REMOVED 2026-06-02 —
   # Claude Code's native "(N local agents)" is the source of truth for live agents;
   # the dashboard Hunters field was redundant + disagreed with it, 12-min work-dir
-  # window over-counted recently-finished hunters. Auth dot stays.)
+  # window over-counted recently-finished hunters.)
+  #
+  # AUTH DOT REMOVED 2026-07-31. It reported on a state file belonging to a separate,
+  # private toolchain and had no place in a general-purpose dashboard: this repo is
+  # public, the hardcoded path disclosed that project's layout, and the panel was dead
+  # weight for anyone not running it. It was also the only thing in this file coupled to
+  # another project's directory structure, which is precisely how it broke silently —
+  # that project reorganised, and the dot went on reporting a file nothing updated.
   [ -n "$T_ICON_SES" ] && printf "${T_ACCENT3}${T_ICON_SES}${RESET} "
   printf "${T_ACCENT3}CPU:${RESET} ${sys_color_cpu:-$T_VALUE}%s${RESET}" "$cpu_load"
   printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Mem:${RESET} ${sys_color_mem:-$T_VALUE}%s${RESET}" "$mem_display"
   printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT3}Disk:${RESET} ${sys_color_disk:-$T_VALUE}%s${RESET}" "$disk_display"
-  # Auth dot (🟢/🔴) appended to the SAME end-line
-  local _authf="$HOME/hacking-workspace/hydra/state/auth-status.json"
-  printf " ${T_BORDER}${T_SEP}${RESET} ${T_LABEL}Auth:${RESET} "
-  # Fail-safe dot: GREEN only if the status file says GREEN *and* is fresh.
-  # The writer (m-auth-status cron, every-minute cadence) can stall — when it does
-  # the file freezes at its last value. Trusting a stale GREEN showed a 7h-dead
-  # auth as live (2026-06-02). Freshness window 180s = 3x the 60s write cadence,
-  # matching crons.json tick_evidence max_age_min:3. Stale/RED/missing -> RED.
-  local _authage=999999
-  [ -f "$_authf" ] && _authage=$(( $(date +%s) - $(stat -f %m "$_authf" 2>/dev/null || echo 0) ))
-  if [ "$_authage" -le 180 ] && grep -q '"state":"GREEN"' "$_authf" 2>/dev/null; then
-    printf "${T_GREEN}\xF0\x9F\x9F\xA2${RESET}"
-  elif [ "$_authage" -gt 180 ]; then
-    printf "${T_RED}\xF0\x9F\x94\xB4${RESET}${T_DIM:-} (stale)${RESET}"
-  else
-    printf "${T_RED}\xF0\x9F\x94\xB4${RESET}"
-  fi
   printf "\n"
 }
 

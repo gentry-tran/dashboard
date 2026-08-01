@@ -99,23 +99,46 @@ fi
 
 input=$(cat)
 
+# EVERY value is @sh-quoted before it reaches eval. THIS IS LOAD-BEARING, NOT STYLE.
+#
+# The numeric fields below used `| tostring` while only the four string fields used `@sh`.
+# JSON does not constrain a field's type to what we expect, so a STRING in any "numeric"
+# slot was interpolated raw into the text handed to `eval` — i.e. arbitrary command
+# execution from the payload on stdin. Demonstrated against this script:
+#
+#     {"context_window":{"used_percentage":"0; touch /tmp/proof; #"}}   ->  file created
+#
+# `tostring` converts a value to a string; it does NOT make it safe to eval. `@sh` is the
+# operator that shell-quotes, and it is correct on numbers too, so there is no reason for
+# any field here to skip it. Fields are consumed as strings and validated numerically at
+# point of use — see is_pos_int — because a shell-quoted non-number is still a non-number.
 eval "$(echo "$input" | jq -r '
   "current_dir=" + (.workspace.current_dir // .cwd // "" | @sh) + "\n" +
   "transcript_path=" + (.transcript_path // "" | @sh) + "\n" +
   "model_name=" + (.model.display_name // "unknown" | @sh) + "\n" +
   "cc_version=" + (.version // "" | @sh) + "\n" +
-  "duration_ms=" + (.cost.total_duration_ms // 0 | tostring) + "\n" +
-  "cache_read=" + ((.context_window.current_usage.cache_read_input_tokens // 0) | tostring) + "\n" +
-  "input_tokens=" + ((.context_window.current_usage.input_tokens // 0) | tostring) + "\n" +
-  "cache_creation=" + ((.context_window.current_usage.cache_creation_input_tokens // 0) | tostring) + "\n" +
-  "output_tokens=" + ((.context_window.current_usage.output_tokens // 0) | tostring) + "\n" +
-  "context_max=" + (.context_window.context_window_size // 0 | tostring) + "\n" +
-  "context_used_pct=" + (.context_window.used_percentage // "" | tostring) + "\n" +
-  "rl_5h_pct=" + (.rate_limits.five_hour.used_percentage // "" | tostring) + "\n" +
-  "rl_5h_reset=" + (.rate_limits.five_hour.resets_at // "" | tostring) + "\n" +
-  "rl_7d_pct=" + (.rate_limits.seven_day.used_percentage // "" | tostring) + "\n" +
-  "rl_7d_reset=" + (.rate_limits.seven_day.resets_at // "" | tostring)
+  "duration_ms=" + (.cost.total_duration_ms // 0 | tostring | @sh) + "\n" +
+  "cache_read=" + ((.context_window.current_usage.cache_read_input_tokens // 0) | tostring | @sh) + "\n" +
+  "input_tokens=" + ((.context_window.current_usage.input_tokens // 0) | tostring | @sh) + "\n" +
+  "cache_creation=" + ((.context_window.current_usage.cache_creation_input_tokens // 0) | tostring | @sh) + "\n" +
+  "output_tokens=" + ((.context_window.current_usage.output_tokens // 0) | tostring | @sh) + "\n" +
+  "context_max=" + (.context_window.context_window_size // 0 | tostring | @sh) + "\n" +
+  "context_used_pct=" + (.context_window.used_percentage // "" | tostring | @sh) + "\n" +
+  "rl_5h_pct=" + (.rate_limits.five_hour.used_percentage // "" | tostring | @sh) + "\n" +
+  "rl_5h_reset=" + (.rate_limits.five_hour.resets_at // "" | tostring | @sh) + "\n" +
+  "rl_7d_pct=" + (.rate_limits.seven_day.used_percentage // "" | tostring | @sh) + "\n" +
+  "rl_7d_reset=" + (.rate_limits.seven_day.resets_at // "" | tostring | @sh)
 ' 2>/dev/null)"
+
+# Numeric fields reaching $(( )) must be integers. bash arithmetic evaluates array
+# subscripts, and a subscript can contain a command substitution — `x="a[$(cmd)]"` inside
+# $(( x + 0 )) EXECUTES cmd (verified on this box). @sh above stops the eval injection;
+# this stops the arithmetic one, which is a separate context with its own rules.
+is_pos_int() { case "$1" in ''|*[!0-9]*) return 1 ;; *) return 0 ;; esac; }
+for _n in duration_ms cache_read input_tokens cache_creation output_tokens context_max; do
+  is_pos_int "${!_n}" || printf -v "$_n" '%s' 0
+done
+unset _n
 
 # Defaults for empty values
 cache_read=${cache_read:-0}

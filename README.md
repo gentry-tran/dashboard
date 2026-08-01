@@ -4,12 +4,12 @@
 
 **A beautiful, themeable status line for [Claude Code](https://docs.anthropic.com/en/docs/claude-code)**
 
-22 themes including pop culture, anime, nature, sci-fi, and classic developer aesthetics.
+25 themes including three light themes, plus pop culture, anime, nature, sci-fi and classic developer aesthetics.
 
 ![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat&logo=gnubash&logoColor=white)
 ![Claude Code](https://img.shields.io/badge/Claude_Code-D4A574?style=flat&logo=anthropic&logoColor=white)
 ![License](https://img.shields.io/github/license/gentry-tran/dashboard?style=flat&color=60A5FA)
-![Themes](https://img.shields.io/badge/Themes-22-8B5CF6?style=flat)
+![Themes](https://img.shields.io/badge/Themes-25-8B5CF6?style=flat)
 
 </div>
 
@@ -82,6 +82,25 @@ export DASHBOARD_THEME=harvest
 
 #### Terrarium
 ![Terrarium](screenshots/terrarium.png)
+
+### Light Themes
+
+Every other theme here is foreground-only and assumes a dark terminal — they lean on bright
+white, bright black and neon truecolor, which range from low-contrast to invisible on a light
+background. These three are built the other way round: dark ink for a white or cream terminal.
+
+All colours are measured, not eyeballed. `./check-contrast.py` computes WCAG 2.x contrast
+ratios for every theme against the frame it is rendered on and fails anything under 3.0 for
+informative colour or 4.5 for body text.
+
+#### Light
+![Light](screenshots/light.png)
+
+#### Solarized Light
+![Solarized Light](screenshots/solarized-light.png)
+
+#### Paper
+![Paper](screenshots/paper.png)
 
 ### Standard Themes
 

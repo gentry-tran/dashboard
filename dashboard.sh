@@ -68,19 +68,99 @@ done
 mkdir -p "$(dirname "$USAGE_CACHE")" 2>/dev/null
 
 # ─────────────────────────────────────────────────────────────────────────────
+# SHARED HELPERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ONE clock for the whole render. `date +%s` was called at six separate sites, which forks
+# six times and — worse — lets different sections of a single panel compute ages against
+# different "now"s. A render is a snapshot; it should have one timestamp.
+NOW=$(date +%s)
+
+# Integer predicate. Used for every value that reaches $(( )) or `[ -n ] -gt`, because
+# "non-empty" is not "numeric": a multi-line string, an error message on stdout, "80x24"
+# and "-1" are all non-empty and none is a width.
+is_pos_int() { case "$1" in ''|*[!0-9]*) return 1 ;; *) return 0 ;; esac; }
+
+# Age of a file in seconds, or the sentinel 999999 when it does not exist / cannot be read.
+#
+# NEGATIVE AGES ARE THE BUG THIS EXISTS FOR. Every site computed `NOW - mtime` unguarded. If
+# mtime is ever in the FUTURE — clock corrected backwards, a file restored with `cp -p`, a
+# synced or NFS volume with a skewed writer — the age goes negative, `age -gt TTL` is false
+# forever, and the cache NEVER refreshes again. That is the same skew-toward-fresh failure as
+# a stale-heartbeat check reading a future timestamp as live: the direction of the error
+# disables the very refresh that would correct it, and nothing reports a fault because the
+# panel keeps rendering the last good values indefinitely.
+file_age() {
+  [ -f "$1" ] || { printf '%s\n' 999999; return; }
+  local m age
+  m=$(stat -f %m "$1" 2>/dev/null || stat -c %Y "$1" 2>/dev/null) || m=""
+  is_pos_int "$m" || { printf '%s\n' 999999; return; }
+  age=$(( NOW - m ))
+  [ "$age" -ge 0 ] || age=999999          # future mtime -> treat as stale, never as fresh
+  printf '%s\n' "$age"
+}
+
+# Write a cache file atomically: temp in the SAME directory, then rename.
+# `echo "$data" > "$CACHE"` truncates first, so a concurrent reader — a second instance when
+# a run overruns the 60s tick — can observe an empty or half-written file and every jq against
+# it fails for the rest of the TTL. rename(2) is atomic, so a reader sees old or new, never a
+# torn middle. Callers still validate the payload parses BEFORE calling this.
+cache_write() {
+  local dest="$1" data="$2" tmp
+  tmp=$(mktemp "${dest}.XXXXXX" 2>/dev/null) || return 1
+  if printf '%s\n' "$data" > "$tmp" 2>/dev/null; then
+    mv -f "$tmp" "$dest" 2>/dev/null && return 0
+  fi
+  rm -f "$tmp" 2>/dev/null
+  return 1
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
 # TERMINAL WIDTH DETECTION
 # ─────────────────────────────────────────────────────────────────────────────
 
 detect_terminal_width() {
-  local width=""
-  if [ -n "$KITTY_WINDOW_ID" ] && command -v kitten >/dev/null 2>&1; then
-    width=$(kitten @ ls 2>/dev/null | jq -r --argjson wid "$KITTY_WINDOW_ID" \
-      '[.[] | .tabs[] | .windows[] | select(.id == $wid)] | .[0].columns // empty' 2>/dev/null)
-  fi
-  [ -z "$width" ] || [ "$width" = "0" ] && width=$(stty size </dev/tty 2>/dev/null | awk '{print $2}')
-  [ -z "$width" ] || [ "$width" = "0" ] && width=$(tput cols 2>/dev/null)
-  [ -z "$width" ] || [ "$width" = "0" ] && width=${COLUMNS:-80}
-  echo "$width"
+  # VALIDATE SHAPE, NOT EMPTINESS. This was a chain of
+  #     [ -z "$w" ] || [ "$w" = "0" ] && w=<next source>
+  # which parses as `(A || B) && C` and is accidentally correct for empty/"0"/valid — but the
+  # PREDICATE is wrong. "Non-empty and not exactly 0" admits multi-line output ("80\n24"), an
+  # error string printed to stdout, "80x24", "-1", "00". Every one of those was accepted as a
+  # width and reached `$(( width - 4 ))`. The first source is a terminal query running in a
+  # process with NO CONTROLLING TERMINAL, so those malformed outputs are its LIKELY results,
+  # not exotic ones. is_pos_int tests the property that actually matters.
+  #
+  # The chain was also ordered worst-first. Headless — which is how this runs — kitty's query
+  # and stty-on-/dev/tty cannot work, `tput` needs a TERM that is usually unset, and bash only
+  # sets COLUMNS in interactive shells, so `${COLUMNS:-80}` was effectively always the literal
+  # 80. Honest ordering puts the caller-supplied width first and treats 80 as the default it
+  # has always actually been.
+  local w
+  for w in "$DASHBOARD_WIDTH" \
+           "$(kitty_width)" \
+           "$(stty_width)" \
+           "$(tput cols 2>/dev/null)" \
+           "$COLUMNS" \
+           80; do
+    if is_pos_int "$w" && [ "$w" -ge 20 ]; then printf '%s\n' "$w"; return 0; fi
+  done
+  printf '%s\n' 80
+}
+
+kitty_width() {
+  [ -n "$KITTY_WINDOW_ID" ] && command -v kitten >/dev/null 2>&1 || return 0
+  kitten @ ls 2>/dev/null | jq -r --argjson wid "$KITTY_WINDOW_ID" \
+    '[.[] | .tabs[] | .windows[] | select(.id == $wid)] | .[0].columns // empty' 2>/dev/null
+}
+
+stty_width() {
+  # REDIRECTION ORDER IS THE FIX. This was `stty size </dev/tty 2>/dev/null`: bash applies
+  # redirections left to right, so the INPUT redirect fails before stderr has been silenced
+  # and the shell's own complaint — "line 80: /dev/tty: Device not configured" — escapes to
+  # the real stderr on every run. At a 60s cadence that is ~1400 lines/day into whatever the
+  # parent does with stderr, and if the parent ever merges stderr into stdout it lands inside
+  # the rendered panel. Test readability first and skip entirely when there is no tty.
+  [ -r /dev/tty ] || return 0
+  stty size 2>/dev/null </dev/tty | awk '{print $2}'
 }
 
 TERM_WIDTH=$(detect_terminal_width)
@@ -98,6 +178,24 @@ fi
 # ─────────────────────────────────────────────────────────────────────────────
 
 input=$(cat)
+# STDIN IS CONSUMED EXACTLY ONCE, THEN CLOSED. The parent pipes a JSON blob here; any child
+# that reads stdin — an unredirected command, a `read` loop, curl with a stdin option — would
+# eat part of it, and the symptom is a field that is empty only sometimes, which is close to
+# undiagnosable. Point it at /dev/null so no descendant can touch it.
+exec </dev/null
+
+# DEGRADED MODE. With errexit deliberately off (a renderer's contract is "always emit a line",
+# so aborting halfway is worse than a panel with one blank field), a missing `jq` makes EVERY
+# field empty and the panel renders as a plausible-looking box full of blanks — total silent
+# degradation that looks like "no data yet". Headless launchers routinely provide a minimal
+# PATH without /opt/homebrew/bin, so this is the normal failure, not an exotic one. Say so.
+DEGRADED=""
+command -v jq   >/dev/null 2>&1 || DEGRADED="jq missing"
+command -v curl >/dev/null 2>&1 || DEGRADED="${DEGRADED:+$DEGRADED, }curl missing"
+if [ -n "$DEGRADED" ]; then
+  printf 'dashboard: DEGRADED — %s (PATH=%s)\n' "$DEGRADED" "$PATH"
+  exit 0
+fi
 
 # EVERY value is @sh-quoted before it reaches eval. THIS IS LOAD-BEARING, NOT STYLE.
 #
@@ -134,7 +232,6 @@ eval "$(echo "$input" | jq -r '
 # subscripts, and a subscript can contain a command substitution — `x="a[$(cmd)]"` inside
 # $(( x + 0 )) EXECUTES cmd (verified on this box). @sh above stops the eval injection;
 # this stops the arithmetic one, which is a separate context with its own rules.
-is_pos_int() { case "$1" in ''|*[!0-9]*) return 1 ;; *) return 0 ;; esac; }
 for _n in duration_ms cache_read input_tokens cache_creation output_tokens context_max; do
   is_pos_int "${!_n}" || printf -v "$_n" '%s' 0
 done
@@ -848,11 +945,11 @@ load_theme "$THEME"
 # Location (cached)
 fetch_location() {
   local cache_age=999999
-  [ -f "$LOCATION_CACHE" ] && cache_age=$(($(date +%s) - $(stat -f %m "$LOCATION_CACHE" 2>/dev/null || stat -c %Y "$LOCATION_CACHE" 2>/dev/null || echo 0)))
+  cache_age=$(file_age "${LOCATION_CACHE}")
   if [ "$cache_age" -gt "$LOCATION_CACHE_TTL" ]; then
     local loc_data=$(curl -s --max-time 3 "https://ipinfo.io/json" 2>/dev/null)
     if [ -n "$loc_data" ] && echo "$loc_data" | jq -e '.city' >/dev/null 2>&1; then
-      echo "$loc_data" > "$LOCATION_CACHE"
+      cache_write "$LOCATION_CACHE" "$loc_data"
     fi
   fi
 }
@@ -860,7 +957,7 @@ fetch_location() {
 # Weather (cached)
 fetch_weather() {
   local cache_age=999999
-  [ -f "$WEATHER_CACHE" ] && cache_age=$(($(date +%s) - $(stat -f %m "$WEATHER_CACHE" 2>/dev/null || stat -c %Y "$WEATHER_CACHE" 2>/dev/null || echo 0)))
+  cache_age=$(file_age "${WEATHER_CACHE}")
   if [ "$cache_age" -gt "$WEATHER_CACHE_TTL" ]; then
     if [ -f "$LOCATION_CACHE" ]; then
       local loc=$(jq -r '.loc // empty' "$LOCATION_CACHE" 2>/dev/null)
@@ -869,7 +966,7 @@ fetch_weather() {
         local lon="${loc##*,}"
         local weather_data=$(curl -s --max-time 3 "https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,weather_code&temperature_unit=celsius" 2>/dev/null)
         if [ -n "$weather_data" ] && echo "$weather_data" | jq -e '.current' >/dev/null 2>&1; then
-          echo "$weather_data" > "$WEATHER_CACHE"
+          cache_write "$WEATHER_CACHE" "$weather_data"
         fi
       fi
     fi
@@ -879,17 +976,24 @@ fetch_weather() {
 # Usage (cached, Anthropic API — always fetch for resets_at timestamps)
 fetch_usage() {
   local cache_age=999999
-  [ -f "$USAGE_CACHE" ] && cache_age=$(($(date +%s) - $(stat -f %m "$USAGE_CACHE" 2>/dev/null || stat -c %Y "$USAGE_CACHE" 2>/dev/null || echo 0)))
+  cache_age=$(file_age "${USAGE_CACHE}")
   if [ "$cache_age" -gt "$USAGE_CACHE_TTL" ]; then
     local creds=$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null)
     local token=$(echo "$creds" | jq -r '.claudeAiOauth.accessToken // empty' 2>/dev/null)
     if [ -n "$token" ]; then
-      local usage_data=$(curl -s --max-time 3 \
-        -H "Authorization: Bearer $token" \
-        -H "anthropic-beta: oauth-2025-04-20" \
-        "https://api.anthropic.com/api/oauth/usage" 2>/dev/null)
+      # THE TOKEN MUST NOT APPEAR IN ARGV. It was passed as `-H "Authorization: Bearer $token"`,
+      # and a process's arguments are world-readable in the process table — any local user
+      # running `ps auxww` at the right moment reads a live OAuth access token. This runs every
+      # 60s unattended, so "the right moment" is continuous rather than a race worth winning.
+      # Headers now go to curl on STDIN via `-H @-`, which argv never sees. `--fail` so an
+      # HTTP error is not cached as if it were a body, `--max-time` already bounds a hung
+      # endpoint (this whole script is on a 60s tick).
+      local usage_data
+      usage_data=$(printf 'Authorization: Bearer %s\nanthropic-beta: oauth-2025-04-20\n' "$token" \
+        | curl -s --fail --max-time 3 -H @- \
+          "https://api.anthropic.com/api/oauth/usage" 2>/dev/null)
       if [ -n "$usage_data" ] && echo "$usage_data" | jq -e '.five_hour' >/dev/null 2>&1; then
-        echo "$usage_data" > "$USAGE_CACHE"
+        cache_write "$USAGE_CACHE" "$usage_data"
       fi
     fi
   fi
@@ -910,7 +1014,7 @@ _resolve_claude_bin() {
 
 fetch_account() {
   local cache_age=999999
-  [ -f "$ACCOUNT_CACHE" ] && cache_age=$(($(date +%s) - $(stat -f %m "$ACCOUNT_CACHE" 2>/dev/null || stat -c %Y "$ACCOUNT_CACHE" 2>/dev/null || echo 0)))
+  cache_age=$(file_age "${ACCOUNT_CACHE}")
   if [ "$cache_age" -gt "$ACCOUNT_CACHE_TTL" ]; then
     local claude_bin
     claude_bin=$(_resolve_claude_bin)
@@ -919,7 +1023,7 @@ fetch_account() {
     account_data=$("$claude_bin" auth status 2>/dev/null)
     if [ -n "$account_data" ] && echo "$account_data" | jq -e '.email' >/dev/null 2>&1; then
       mkdir -p "$(dirname "$ACCOUNT_CACHE")"
-      echo "$account_data" > "$ACCOUNT_CACHE"
+      cache_write "$ACCOUNT_CACHE" "$account_data"
     fi
   fi
 }
@@ -1068,7 +1172,7 @@ format_reset() {
   reset_epoch=$(parse_iso_epoch "$reset_ts")
   [ -z "$reset_epoch" ] && return
   [ -z "$reset_epoch" ] && return
-  local now_epoch=$(date +%s)
+  local now_epoch=$NOW
   local diff=$(( reset_epoch - now_epoch ))
   [ "$diff" -lt 0 ] && diff=0
   local days=$(( diff / 86400 ))
@@ -1201,7 +1305,7 @@ agent_count=0
 if [ -n "$transcript_path" ]; then
   subagents_dir="$(dirname "$transcript_path")/subagents"
   if [ -d "$subagents_dir" ]; then
-    now_epoch=$(date +%s)
+    now_epoch=$NOW
     agent_count=$(find "$subagents_dir" -name 'agent-*.jsonl' -type f 2>/dev/null | while read -r f; do
       mt=$(stat -f %m "$f" 2>/dev/null || stat -c %Y "$f" 2>/dev/null)
       [ -n "$mt" ] && [ "$((now_epoch - mt))" -lt 180 ] && echo x
@@ -1433,3 +1537,8 @@ else
   printf '%s\n' "$body"
   [ -n "$T_LINE_TOP" ] && make_line "$T_LINE_TOP"
 fi
+
+# A renderer must not leak a nonzero status: the last command in this script would otherwise
+# decide it. `[ -n "$X" ] && ...` as a final statement exits 1 whenever X is empty, and a strict
+# parent may treat that as failure and render nothing.
+exit 0

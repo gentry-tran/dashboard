@@ -16,9 +16,6 @@
 #    batman, iron-man, dbz, evangelion, ghost-in-shell, akira,
 #    spider-verse, blade-runner, one-piece, ghibli,
 #    nebula, mythos, netrunner
-#
-#  LIGHT themes (dark ink for a white/cream terminal):
-#    light, solarized-light, paper
 # ============================================================================
 
 set -o pipefail
@@ -38,7 +35,7 @@ LOCATION_CACHE="${DASHBOARD_CACHE_DIR:-$CONFIG_DIR/dashboard-cache}/location.jso
 WEATHER_CACHE="${DASHBOARD_CACHE_DIR:-$CONFIG_DIR/dashboard-cache}/weather.json"
 ACCOUNT_CACHE="${DASHBOARD_CACHE_DIR:-$CONFIG_DIR/dashboard-cache}/account.json"
 
-USAGE_CACHE_TTL=${DASHBOARD_USAGE_TTL:-60}         # 60s — sync with the statusline refresh
+USAGE_CACHE_TTL=${DASHBOARD_USAGE_TTL:-120}        # 2 minutes
 LOCATION_CACHE_TTL=${DASHBOARD_LOCATION_TTL:-3600} # 1 hour
 WEATHER_CACHE_TTL=${DASHBOARD_WEATHER_TTL:-900}    # 15 minutes
 ACCOUNT_CACHE_TTL=${DASHBOARD_ACCOUNT_TTL:-60}     # 60s — sync with dashboard refresh
@@ -407,108 +404,6 @@ load_theme() {
       T_LINE_H="·"
       T_LINE_TOP=""
       T_BAR_FILL="█"
-      T_BAR_EMPTY="░"
-      T_ICON_CTX=""
-      T_ICON_USE=""
-      T_ICON_SES=""
-      T_ICON_TIME=""
-      ;;
-
-    # ── LIGHT THEMES ─────────────────────────────────────────────────────────
-    # Every other theme in this file is FOREGROUND-ONLY and assumes a dark terminal:
-    # they lean on bright white (37), bright black (90) and neon truecolor, all of
-    # which are somewhere between low-contrast and invisible on a light background.
-    # These three are built the other way round — dark ink for a light page — so they
-    # are the ones to pick if your terminal background is white/cream rather than
-    # near-black. Contrast ratios below are against the noted background.
-
-    light)
-      # Neutral, high-contrast. Ink on white (#ffffff): body text ~12:1, labels ~5.7:1.
-      T_HEADER="DASHBOARD"
-      T_BORDER='\033[38;2;154;160;166m'      # #9aa0a6 grey rule
-      T_TITLE='\033[1;38;2;32;33;36m'        # #202124 near-black
-      T_LABEL='\033[38;2;95;99;104m'         # #5f6368 secondary
-      T_VALUE='\033[38;2;32;33;36m'          # #202124 primary
-      T_HIGHLIGHT='\033[38;2;24;90;188m'     # #185abc blue
-      T_ACCENT1='\033[38;2;154;52;18m'       # #9a3412 rust
-      T_ACCENT2='\033[38;2;21;101;93m'       # #15655d teal
-      T_ACCENT3='\033[38;2;91;33;182m'       # #5b21b6 violet
-      T_ACCENT4='\033[38;2;95;99;104m'
-      T_GREEN='\033[38;2;20;108;67m'         # #146c43
-      T_YELLOW='\033[38;2;146;100;0m'        # #926400 — dark enough to read on white
-      T_RED='\033[38;2;176;0;32m'            # #b00020
-      T_DIM='\033[38;2;128;134;139m'
-      T_WEATHER='\033[38;2;24;90;188m'
-      T_BAR_SESSION='\033[38;2;176;0;32m'
-      T_BAR_WEEK='\033[38;2;146;100;0m'
-      T_BAR_CTX='\033[38;2;24;90;188m'
-      T_SEP="│"
-      T_LINE_H="─"
-      T_LINE_TOP=""
-      T_BAR_FILL="█"
-      T_BAR_EMPTY="░"
-      T_ICON_CTX="◆"
-      T_ICON_USE="▲"
-      T_ICON_SES="●"
-      T_ICON_TIME="◷"
-      ;;
-
-    solarized-light)
-      # Ethan Schoonover's light palette on base3 (#fdf6e3). base00 body ~7.5:1.
-      T_HEADER="DASHBOARD"
-      T_BORDER='\033[38;2;147;161;161m'      # base1
-      T_TITLE='\033[1;38;2;7;54;66m'         # base02
-      T_LABEL='\033[38;2;88;110;117m'        # base01
-      T_VALUE='\033[38;2;88;110;117m'        # base01 — base00 measures 4.45:1 on white, just under the 4.5 body bar
-      T_HIGHLIGHT='\033[38;2;38;139;210m'    # blue
-      T_ACCENT1='\033[38;2;203;75;22m'       # orange
-      T_ACCENT2='\033[38;2;42;161;152m'      # cyan
-      T_ACCENT3='\033[38;2;108;113;196m'     # violet
-      T_ACCENT4='\033[38;2;88;110;117m'
-      T_GREEN='\033[38;2;133;153;0m'
-      T_YELLOW='\033[38;2;181;137;0m'
-      T_RED='\033[38;2;220;50;47m'
-      T_DIM='\033[38;2;147;161;161m'
-      T_WEATHER='\033[38;2;38;139;210m'
-      T_BAR_SESSION='\033[38;2;220;50;47m'
-      T_BAR_WEEK='\033[38;2;181;137;0m'
-      T_BAR_CTX='\033[38;2;38;139;210m'
-      T_SEP="│"
-      T_LINE_H="─"
-      T_LINE_TOP=""
-      T_BAR_FILL="█"
-      T_BAR_EMPTY="░"
-      T_ICON_CTX="◆"
-      T_ICON_USE="▲"
-      T_ICON_SES="●"
-      T_ICON_TIME="◷"
-      ;;
-
-    paper)
-      # Warm, low-chroma, for cream backgrounds (#faf4ed). Deliberately quiet: one
-      # accent hue, no emoji-weight icons, so the numbers carry the emphasis.
-      T_HEADER="DASHBOARD"
-      T_BORDER='\033[38;2;180;170;158m'
-      T_TITLE='\033[1;38;2;87;82;121m'       # #575279 iris
-      T_LABEL='\033[38;2;121;117;147m'
-      T_VALUE='\033[38;2;87;82;121m'
-      T_HIGHLIGHT='\033[38;2;40;105;131m'    # pine
-      T_ACCENT1='\033[38;2;180;99;122m'      # rose
-      T_ACCENT2='\033[38;2;86;148;159m'      # foam
-      T_ACCENT3='\033[38;2;144;122;169m'
-      T_ACCENT4='\033[38;2;121;117;147m'
-      T_GREEN='\033[38;2;40;105;131m'
-      T_YELLOW='\033[38;2;176;115;15m'       # #b0730f — the original #ea9d34 is 2.2:1 on white
-      T_RED='\033[38;2;180;99;122m'
-      T_DIM='\033[38;2;152;147;165m'
-      T_WEATHER='\033[38;2;86;148;159m'
-      T_BAR_SESSION='\033[38;2;180;99;122m'
-      T_BAR_WEEK='\033[38;2;176;115;15m'
-      T_BAR_CTX='\033[38;2;40;105;131m'
-      T_SEP="·"
-      T_LINE_H="─"
-      T_LINE_TOP=""
-      T_BAR_FILL="▓"
       T_BAR_EMPTY="░"
       T_ICON_CTX=""
       T_ICON_USE=""

@@ -51,12 +51,12 @@ USAGE=$(curl -s --max-time 5 \
   -H "Authorization: Bearer $TOKEN" \
   -H "anthropic-beta: oauth-2025-04-20" \
   "https://api.anthropic.com/api/oauth/usage" 2>/dev/null)
-echo "$USAGE" | jq -e '.five_hour' >/dev/null 2>&1 || { echo "[$NOW_ISO] usage fetch failed — skip" >&2; exit 0; }
+echo "$USAGE" | jq -e '.seven_day' >/dev/null 2>&1 || { echo "[$NOW_ISO] usage fetch failed — skip" >&2; exit 0; }
 
-# Build this snapshot line.
+# Build this snapshot line. five_hour may be null (Ultra plan) — record it anyway.
 LINE=$(printf '%s' "$USAGE" | jq -c --arg ts "$NOW_ISO" '{
   ts: $ts,
-  five_hour:  {util: .five_hour.utilization,  resets_at: .five_hour.resets_at},
+  five_hour:  (if .five_hour then {util: .five_hour.utilization, resets_at: .five_hour.resets_at} else null end),
   seven_day:  {util: .seven_day.utilization,  resets_at: .seven_day.resets_at}
 }')
 

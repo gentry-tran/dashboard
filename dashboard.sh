@@ -1097,7 +1097,7 @@ fetch_usage() {
       usage_data=$(printf 'Authorization: Bearer %s\nanthropic-beta: oauth-2025-04-20\n' "$token" \
         | curl -s --fail --max-time 3 -H @- \
           "https://api.anthropic.com/api/oauth/usage" 2>/dev/null)
-      if [ -n "$usage_data" ] && echo "$usage_data" | jq -e '.five_hour' >/dev/null 2>&1; then
+      if [ -n "$usage_data" ] && echo "$usage_data" | jq -e '.seven_day' >/dev/null 2>&1; then
         cache_write "$USAGE_CACHE" "$usage_data"
       fi
     fi
@@ -1219,25 +1219,12 @@ if [ -n "$temp_c" ]; then
 fi
 
 # Parse usage — stdin for percentages (fresh), API cache for resets_at (timestamps)
+# Ultra: five_hour is null (no session limit). Max: five_hour has data.
+# Both plans have seven_day. Adaptive: show session bar only when data exists.
 usage_5h="" usage_7d="" usage_5h_reset="" usage_7d_reset=""
 
 # Percentages: prefer stdin (real-time from Claude Code), fallback to API cache.
-#
-# THE TWO WINDOWS ARE INDEPENDENT FIELDS AND MUST BE READ INDEPENDENTLY. The 7-day
-# assignment used to be NESTED inside the 5-hour presence check:
-#
-#     if [ -n "$rl_5h_pct" ]; then
-#       usage_5h="$rl_5h_pct"
-#       [ -n "$rl_7d_pct" ] && usage_7d="$rl_7d_pct"   # unreachable when 5h is absent
-#     fi
-#
-# so a payload carrying a fresh seven_day percentage but no five_hour one silently DROPPED
-# the 7-day value and fell through to the API cache below. The weekly number then displayed
-# a stale cached reading while looking live — the failure is invisible, because a plausible
-# percentage is shown either way and nothing indicates which source it came from.
-#
-# Nesting is what made it invisible: the 7-day value was conditioned on a variable that has
-# nothing to do with it.
+# Each window is independent — read them separately.
 [ -n "$rl_5h_pct" ] && usage_5h="$rl_5h_pct"
 [ -n "$rl_7d_pct" ] && usage_7d="$rl_7d_pct"
 
@@ -1562,24 +1549,25 @@ render_body() {
   [ -n "$time_dur" ] && printf " ${T_BORDER}${T_SEP}${RESET} ${T_ACCENT1}Uptime:${RESET} ${T_VALUE}%s${RESET}" "$time_dur"
   printf "\n"
 
-  # Lines 2-4: Session / Week / Context bars (one per line)
+  # Usage bars: Session (Max plan only) + Week + Context
   local usage_5h_int="${usage_5h%%.*}"
   local usage_7d_int="${usage_7d%%.*}"
   usage_5h_int="${usage_5h_int:-0}"
   usage_7d_int="${usage_7d_int:-0}"
 
-  # Icons are equal-width (all 2-col emoji) and labels padded to 8 chars so all
-  # three bars start at the same column. Icons chosen to match each metric:
-  #   ⏳ Session (5-hour rolling window)  📆 Week (7-day window)  🧠 Context (window fill)
-  printf "${T_ACCENT2}⏳${RESET} ${T_ACCENT3}Session:${RESET} "
-  build_bar "$usage_5h_int" 30 "$T_BAR_SESSION"
-  printf " ${T_BAR_SESSION}${usage_5h_int}%%${RESET}"
-  if [ -n "$reset_5h" ]; then
-    local reset_5h_detail="${reset_5h}"
-    [ -n "$reset_5h_abs" ] && reset_5h_detail="${reset_5h}, ${reset_5h_abs}"
-    printf " ${T_ACCENT4}(${reset_5h_detail})${RESET}"
+  # Session bar: only shown when five_hour data exists (Max plan).
+  # Ultra plan: five_hour is null, bar hidden — only weekly limit applies.
+  if [ -n "$usage_5h" ] && [ "$usage_5h_int" != "0" -o -n "$reset_5h" ]; then
+    printf "${T_ACCENT2}⏳${RESET} ${T_ACCENT3}Session:${RESET} "
+    build_bar "$usage_5h_int" 30 "$T_BAR_SESSION"
+    printf " ${T_BAR_SESSION}${usage_5h_int}%%${RESET}"
+    if [ -n "$reset_5h" ]; then
+      local reset_5h_detail="${reset_5h}"
+      [ -n "$reset_5h_abs" ] && reset_5h_detail="${reset_5h}, ${reset_5h_abs}"
+      printf " ${T_ACCENT4}(${reset_5h_detail})${RESET}"
+    fi
+    printf "\n"
   fi
-  printf "\n"
 
   printf "${T_ACCENT2}📆${RESET} ${T_ACCENT3}Week:   ${RESET} "
   build_bar "$usage_7d_int" 30 "$T_BAR_WEEK"
